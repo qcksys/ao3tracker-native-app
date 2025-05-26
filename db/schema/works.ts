@@ -3,7 +3,7 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const tWorks = sqliteTable("works", {
-  id: integer({ mode: "number" }).notNull(),
+  id: integer({ mode: "number" }).notNull().primaryKey(),
   title: text(),
   chapters: integer({ mode: "number" }),
   lastUpdated: integer({ mode: "timestamp" }),

@@ -1,15 +1,26 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-export const tChapters = sqliteTable("chapters", {
-  id: integer({ mode: "number" }),
-  workId: integer({ mode: "number" }),
-  title: text(),
-  chapterNumber: integer({ mode: "number" }),
-  lastChapterProgress: integer({ mode: "number" }),
-  lastRead: integer({ mode: "timestamp" }),
-});
+export const tChapters = sqliteTable(
+  "chapters",
+  {
+    id: integer({ mode: "number" }).notNull(),
+    workId: integer({ mode: "number" }).notNull(),
+    title: text(),
+    chapterNumber: integer({ mode: "number" }),
+    lastChapterProgress: integer({ mode: "number" }),
+    lastRead: integer({ mode: "timestamp" }),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.id, table.workId] })];
+  },
+);
 
 export const sChaptersI = createInsertSchema(tChapters);
 export const sChaptersS = createSelectSchema(tChapters);

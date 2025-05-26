@@ -1,4 +1,4 @@
-import { db } from "@/db/drizzle";
+import { db, expoDb } from "@/db/drizzle";
 import {
   DarkTheme,
   DefaultTheme,
@@ -10,10 +10,13 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { useSQLiteDevTools } from "expo-sqlite-devtools";
 import migrations from "../drizzle/migrations";
 
 export default function RootLayout() {
-  useMigrations(db, migrations); //TODO add ui for migrations
+  const migration = useMigrations(db, migrations);
+  console.log("Migration Status:", migration);
+  useSQLiteDevTools(expoDb);
 
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({

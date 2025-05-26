@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "252af4b5-7aa2-45a7-88ca-34987191c506",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "14e1754f-819a-4f55-ad78-22f76fb51395",
+  "prevId": "252af4b5-7aa2-45a7-88ca-34987191c506",
   "tables": {
     "chapters": {
       "name": "chapters",
@@ -11,14 +11,14 @@
           "name": "id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "workId": {
           "name": "workId",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "title": {

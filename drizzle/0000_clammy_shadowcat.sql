@@ -4,11 +4,12 @@ CREATE TABLE `chapters` (
 	`title` text,
 	`chapterNumber` integer,
 	`lastChapterProgress` integer,
-	`lastRead` integer
+	`lastRead` integer,
+	PRIMARY KEY(`id`, `workId`)
 );
 --> statement-breakpoint
 CREATE TABLE `works` (
-	`id` integer NOT NULL,
+	`id` integer PRIMARY KEY NOT NULL,
 	`title` text,
 	`chapters` integer,
 	`lastUpdated` integer

@@ -1,4 +1,4 @@
-import { db } from "@/db/drizzle";
+import { buildConflictUpdateColumns, db } from "@/db/drizzle";
 import { tChapters } from "@/db/schema/chapters";
 import { tWorks } from "@/db/schema/works";
 import {
@@ -6,6 +6,7 @@ import {
   parseWorkInfoEvent,
   workInfoEvent,
 } from "@/util/workInfoParser";
+import { and, eq } from "drizzle-orm";
 import type React from "react";
 import { useState } from "react";
 import { useRef } from "react";
@@ -21,11 +22,7 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
   const [lastNavState, setLastNavState] = useState<URL>(
     new URL(props.source && "uri" in props.source ? props.source.uri : ""),
   );
-
-  const pageInfo = parseNavStateUrl(lastNavState);
-
-  console.log(pageInfo);
-  const handleWebViewNavigationStateChange = (
+  const handleWebViewNavigationStateChange = async (
     newNavState: WebViewNavigation,
   ) => {
     const { url } = newNavState;
@@ -33,6 +30,19 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
 
     if (lastNavState?.toString() !== url) {
       setLastNavState(new URL(url));
+
+      const pageInfo = parseNavStateUrl(lastNavState);
+      if (pageInfo.workId && pageInfo.chapterId) {
+        await db
+          .update(tChapters)
+          .set({ lastChapterProgress: pageInfo.scroll })
+          .where(
+            and(
+              eq(tChapters.id, pageInfo.chapterId),
+              eq(tChapters.workId, pageInfo.workId),
+            ),
+          );
+      }
     }
   };
 
@@ -48,6 +58,7 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
         switch (eventData.type) {
           case "workInfo": {
             const parsed = workInfoEvent.safeParse(eventData);
+            console.log(parsed);
             if (parsed.success) {
               const workInfo = parseWorkInfoEvent(parsed.data);
 
@@ -55,19 +66,39 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
                 workInfo.workUrlData.workId &&
                 workInfo.workUrlData.chapterId
               ) {
-                await db.insert(tWorks).values({
-                  id: workInfo.workUrlData.workId,
-                  title: workInfo.workName,
-                  chapters: workInfo.totalChapters,
-                  lastUpdated: workInfo.workLastUpdated,
-                });
-                await db.insert(tChapters).values({
-                  id: workInfo.workUrlData.chapterId,
-                  workId: workInfo.workUrlData.workId,
-                  title: workInfo.chapterName,
-                  chapterNumber: workInfo.chapterNumber,
-                  lastRead: new Date(),
-                });
+                await db
+                  .insert(tWorks)
+                  .values({
+                    id: workInfo.workUrlData.workId,
+                    title: workInfo.workName,
+                    chapters: workInfo.totalChapters,
+                    lastUpdated: workInfo.workLastUpdated,
+                  })
+                  .onConflictDoUpdate({
+                    target: tWorks.id,
+                    set: buildConflictUpdateColumns(tWorks, [
+                      "lastUpdated",
+                      "chapters",
+                      "title",
+                    ]),
+                  });
+                await db
+                  .insert(tChapters)
+                  .values({
+                    id: workInfo.workUrlData.chapterId,
+                    workId: workInfo.workUrlData.workId,
+                    title: workInfo.chapterName,
+                    chapterNumber: workInfo.chapterNumber,
+                    lastRead: new Date(),
+                  })
+                  .onConflictDoUpdate({
+                    target: [tChapters.id, tChapters.workId],
+                    set: buildConflictUpdateColumns(tChapters, [
+                      "title",
+                      "chapterNumber",
+                      "lastRead",
+                    ]),
+                  });
               }
             }
             return;
