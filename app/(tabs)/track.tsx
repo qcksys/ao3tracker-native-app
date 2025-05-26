@@ -4,78 +4,24 @@ import { db } from "@/db/drizzle";
 import { tChapters } from "@/db/schema/chapters";
 import { tWorks } from "@/db/schema/works";
 import { eq, max } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import Constants from "expo-constants";
-import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { ActivityIndicator } from "react-native";
 
 export default function TabTrackerScreen() {
-  const [worksData, setWorksData] = useState<
-    {
-      id: number;
-      title: string | null;
-      totalChapters: number | null;
-      highestChapterNumber: number | null;
-      lastUpdated: Date | null;
-    }[]
-  >([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const allWorks = await db
-          .select({
-            id: tWorks.id,
-            title: tWorks.title,
-            totalChapters: tWorks.chapters,
-            highestChapterNumber: max(tChapters.chapterNumber),
-            lastUpdated: tWorks.lastUpdated,
-          })
-          .from(tWorks)
-          .leftJoin(tChapters, eq(tWorks.id, tChapters.workId))
-          .groupBy(tWorks.id, tWorks.title, tWorks.lastUpdated);
-
-        setWorksData(allWorks);
-      } catch (err) {
-        console.error("Failed to load works data:", err);
-        if (err instanceof Error) {
-          setError(`Failed to load data: ${err.message}`);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []); // Empty dependency array means this runs once on mount
-
-  const formatTimestamp = (timestamp: number) => {
-    if (!timestamp) return "N/A";
-    const date = new Date(timestamp);
-    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-  };
-
-  if (loading) {
-    return (
-      <ThemedView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <ThemedText>Loading data...</ThemedText>
-      </ThemedView>
-    );
-  }
-
-  if (error) {
-    return (
-      <ThemedView style={[styles.container, styles.centerContent]}>
-        <ThemedText type="subtitle" style={styles.errorText}>
-          Error: {error}
-        </ThemedText>
-      </ThemedView>
-    );
-  }
+  const { data } = useLiveQuery(
+    db
+      .select({
+        id: tWorks.id,
+        title: tWorks.title,
+        totalChapters: tWorks.chapters,
+        highestChapterNumber: max(tChapters.chapterNumber),
+        lastUpdated: tWorks.lastUpdated,
+      })
+      .from(tWorks)
+      .leftJoin(tChapters, eq(tWorks.id, tChapters.workId))
+      .groupBy(tWorks.id, tWorks.title, tWorks.lastUpdated),
+  );
 
   return (
     <ThemedView style={styles.container}>
@@ -83,7 +29,7 @@ export default function TabTrackerScreen() {
         Tracked Works
       </ThemedText>
 
-      {worksData.length === 0 ? (
+      {data.length === 0 ? (
         <ThemedText style={styles.noDataText}>No works tracked yet.</ThemedText>
       ) : (
         <ScrollView style={styles.tableContainer}>
@@ -114,7 +60,7 @@ export default function TabTrackerScreen() {
             </ThemedText>
           </View>
 
-          {worksData.map((work) => (
+          {data.map((work) => (
             <View key={work.id} style={styles.tableRow}>
               <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
               <ThemedText style={[styles.tableCell]}>

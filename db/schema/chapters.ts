@@ -10,7 +10,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 export const tChapters = sqliteTable(
   "chapters",
   {
-    id: integer({ mode: "number" }).notNull(),
+    id: integer({ mode: "number" }),
     workId: integer({ mode: "number" }).notNull(),
     title: text(),
     chapterNumber: integer({ mode: "number" }),

@@ -15,7 +15,10 @@ import migrations from "../drizzle/migrations";
 
 export default function RootLayout() {
   const migration = useMigrations(db, migrations);
-  console.log("Migration Status:", migration);
+  if (migration.error) {
+    console.error("Migration Error:", migration.error);
+    return null;
+  }
   useSQLiteDevTools(expoDb);
 
   const colorScheme = useColorScheme();
@@ -23,7 +26,7 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
-  if (!loaded) {
+  if (!loaded || !migration.success) {
     // Async font loading only occurs in development.
     return null;
   }

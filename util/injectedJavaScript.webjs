@@ -56,13 +56,13 @@ const url = new URL(window.location.href);
 
 const urlParts = url.pathname.split("/").filter(Boolean);
 
-if (urlParts.includes("works") && urlParts.includes("chapters")) {
+if (urlParts[0] === "works") {
     window.ReactNativeWebView.postMessage(
         JSON.stringify({
             type: "workInfo",
             url: window.location.href,
             workName: document.querySelector("#workskin h2.title.heading")?.innerText,
-            workLastUpdated: document.querySelector(".work.meta.group .stats dd.status")?.innerText,
+            workLastUpdated: (document.querySelector(".work.meta.group .stats dd.status") || document.querySelector(".work.meta.group .stats dd.published"))?.innerText,
             chapterName: document.querySelector(
                 "#chapters div.chapter div.chapter.preface.group h3.title",
             )?.innerText,

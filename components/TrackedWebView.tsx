@@ -58,15 +58,12 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
         switch (eventData.type) {
           case "workInfo": {
             const parsed = workInfoEvent.safeParse(eventData);
-            console.log(parsed);
+
             if (parsed.success) {
               const workInfo = parseWorkInfoEvent(parsed.data);
 
-              if (
-                workInfo.workUrlData.workId &&
-                workInfo.workUrlData.chapterId
-              ) {
-                await db
+              if (workInfo.workUrlData.workId) {
+                const workInsert = await db
                   .insert(tWorks)
                   .values({
                     id: workInfo.workUrlData.workId,
@@ -82,7 +79,7 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
                       "title",
                     ]),
                   });
-                await db
+                const chapterInsert = await db
                   .insert(tChapters)
                   .values({
                     id: workInfo.workUrlData.chapterId,
@@ -99,7 +96,10 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
                       "lastRead",
                     ]),
                   });
+                console.log("workInfo DB Update", workInsert, chapterInsert);
               }
+            } else {
+              console.error("Error parsing workInfo", parsed);
             }
             return;
           }
