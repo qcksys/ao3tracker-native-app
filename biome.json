@@ -7,6 +7,7 @@
       "./android",
       "./node_modules",
       "./dist",
+      "./drizzle/meta",
       "./package.json"
     ]
   },

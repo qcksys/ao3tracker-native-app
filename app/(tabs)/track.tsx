@@ -2,15 +2,23 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { db } from "@/db/drizzle";
 import { tChapters } from "@/db/schema/chapters";
-import { type TWorksS, tWorks } from "@/db/schema/works";
-import { eq } from "drizzle-orm";
+import { tWorks } from "@/db/schema/works";
+import { eq, max } from "drizzle-orm";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { ActivityIndicator } from "react-native";
 
 export default function TabTrackerScreen() {
-  const [worksData, setWorksData] = useState<TWorksS[]>([]); // Change type to TWorksS[]
+  const [worksData, setWorksData] = useState<
+    {
+      id: number;
+      title: string | null;
+      totalChapters: number | null;
+      highestChapterNumber: number | null;
+      lastUpdated: Date | null;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,11 +30,14 @@ export default function TabTrackerScreen() {
           .select({
             id: tWorks.id,
             title: tWorks.title,
-            chapters: tWorks.chapters,
+            totalChapters: tWorks.chapters,
+            highestChapterNumber: max(tChapters.chapterNumber),
             lastUpdated: tWorks.lastUpdated,
           })
           .from(tWorks)
-          .leftJoin(tChapters, eq(tWorks.id, tChapters.workId));
+          .leftJoin(tChapters, eq(tWorks.id, tChapters.workId))
+          .groupBy(tWorks.id, tWorks.title, tWorks.lastUpdated);
+
         setWorksData(allWorks);
       } catch (err) {
         console.error("Failed to load works data:", err);
@@ -79,29 +90,25 @@ export default function TabTrackerScreen() {
           <View style={styles.tableRow}>
             <ThemedText
               type="subtitle"
-              style={[styles.tableCell, styles.headerCell, styles.idCell]}
-            >
-              ID
-            </ThemedText>
-            <ThemedText
-              type="subtitle"
-              style={[styles.tableCell, styles.headerCell, styles.titleCell]}
+              style={[styles.tableCell, styles.headerCell]}
             >
               Title
             </ThemedText>
             <ThemedText
               type="subtitle"
-              style={[styles.tableCell, styles.headerCell, styles.chaptersCell]}
+              style={[styles.tableCell, styles.headerCell]}
+            >
+              Current Chapter
+            </ThemedText>
+            <ThemedText
+              type="subtitle"
+              style={[styles.tableCell, styles.headerCell]}
             >
               Chapters
             </ThemedText>
             <ThemedText
               type="subtitle"
-              style={[
-                styles.tableCell,
-                styles.headerCell,
-                styles.lastUpdatedCell,
-              ]}
+              style={[styles.tableCell, styles.headerCell]}
             >
               Last Updated
             </ThemedText>
@@ -109,16 +116,14 @@ export default function TabTrackerScreen() {
 
           {worksData.map((work) => (
             <View key={work.id} style={styles.tableRow}>
-              <ThemedText style={[styles.tableCell, styles.idCell]}>
-                {work.id}
+              <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
+              <ThemedText style={[styles.tableCell]}>
+                {work.highestChapterNumber}
               </ThemedText>
-              <ThemedText style={[styles.tableCell, styles.titleCell]}>
-                {work.title}
+              <ThemedText style={[styles.tableCell]}>
+                {work.totalChapters}
               </ThemedText>
-              <ThemedText style={[styles.tableCell, styles.chaptersCell]}>
-                {work.chapters}
-              </ThemedText>
-              <ThemedText style={[styles.tableCell, styles.lastUpdatedCell]}>
+              <ThemedText style={[styles.tableCell]}>
                 {work.lastUpdated ? work.lastUpdated.toString() : "N/A"}
               </ThemedText>
             </View>
@@ -165,18 +170,6 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     paddingHorizontal: 5,
-  },
-  idCell: {
-    flex: 0.5,
-  },
-  titleCell: {
-    flex: 2, // More space for title
-  },
-  chaptersCell: {
-    flex: 1,
-  },
-  lastUpdatedCell: {
-    flex: 1.5, // More space for timestamp
   },
   noDataText: {
     textAlign: "center",
