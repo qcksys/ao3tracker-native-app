@@ -77,8 +77,7 @@ export const parseWorkInfoEvent = (workInfo: TWorkInfoEvent): TWorkInfo => {
 
   return {
     url: workInfo.url,
-    authorUsername:
-      new URL(workInfo.authorUrl).pathname.split("/").filter(Boolean)[1] ?? "",
+    authorUsername: workInfo.authorUrl.split("/").filter(Boolean)[1] ?? "",
     chapterName: workInfo.chapterName || workInfo.workName,
     chapterNumber: Number.parseInt(chapterNumber ? chapterNumber[0] : "0", 10),
     totalChapters: totalChaptersNumber,
