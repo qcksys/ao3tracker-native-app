@@ -28,7 +28,7 @@ function updateScrollPercentageToQueryParam() {
         scrollPercentage = Math.max(0, Math.min(100, progress));
     }
 
-    if (Number.isNaN(scrollPercentage)) {
+    if (scrollPercentage === undefined || Number.isNaN(scrollPercentage)) {
         return;
     }
 
@@ -56,22 +56,33 @@ const url = new URL(window.location.href);
 
 const urlParts = url.pathname.split("/").filter(Boolean);
 
-if (urlParts[0] === "works") {
+if (urlParts[0] === "works" && window.ReactNativeWebView) {
     window.ReactNativeWebView.postMessage(
         JSON.stringify({
             type: "workInfo",
             url: window.location.href,
-            workName: document.querySelector("#workskin h2.title.heading")?.innerText,
+            workName: document.querySelector("#workskin h2.title.heading")?.textContent?.trim(),
             workLastUpdated: (document.querySelector(".work.meta.group .stats dd.status") || document.querySelector(".work.meta.group .stats dd.published"))?.innerText,
             chapterName: document.querySelector(
                 "#chapters div.chapter div.chapter.preface.group h3.title",
-            )?.innerText,
+            )?.textContent?.trim(),
             chapterNumber: document.querySelector("#chapters div.chapter")?.id,
             totalChapters: document.querySelector(
                 ".work.meta.group .stats dd.chapters",
-            )?.innerText,
-            authorUrl: document.querySelector("#workskin .byline.heading a")?.href,
+            )?.textContent?.trim(),
+            authorUrl: document.querySelector("#workskin .byline.heading a")?.getAttribute("href"),
         }),
     );
 }
 
+const scrollToParam = url.searchParams.get("scrollTo");
+if (scrollToParam) {
+    const scrollPosition = parseInt(scrollToParam, 10);
+    const chaptersElement = document.getElementById("chapters");
+
+    if (chaptersElement && !isNaN(scrollPosition)) {
+        const elementHeight = chaptersElement.getBoundingClientRect().height;
+        const scrollTo = chaptersElement.offsetTop + (elementHeight * scrollPosition / 100);
+        window.scrollTo(0, scrollTo);
+    }
+}

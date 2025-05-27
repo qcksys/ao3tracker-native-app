@@ -1,8 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { db } from "@/db/drizzle";
-import { tChapters } from "@/db/schema/chapters";
-import { tWorks } from "@/db/schema/works";
+import { tChapters, tWorks } from "@/db/schema";
 import { and, eq, max } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import Constants from "expo-constants";
@@ -78,19 +77,28 @@ export default function TabTrackerScreen() {
             <Pressable
               key={work.id}
               style={styles.tableRow}
-              onPress={() =>
+              onPress={() => {
+                const workUrl = new URL(
+                  `https://archiveofourown.org/works/${work.id}${
+                    work.highestChapterId
+                      ? `/chapters/${work.highestChapterId}`
+                      : ""
+                  }`,
+                );
+                if (work.highestChapterProgress) {
+                  workUrl.searchParams.set(
+                    "scrollTo",
+                    work.highestChapterProgress.toString(),
+                  );
+                }
+
                 router.navigate({
                   pathname: "/(tabs)/read",
                   params: {
-                    uri: `https://archiveofourown.org/works/${work.id}${
-                      work.highestChapterId
-                        ? `/chapters/${work.highestChapterId}`
-                        : ""
-                    }`,
-                    scroll: work.highestChapterProgress?.toString(),
+                    uri: workUrl.toString(),
                   },
-                })
-              }
+                });
+              }}
             >
               <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
               <ThemedText style={[styles.tableCell]}>

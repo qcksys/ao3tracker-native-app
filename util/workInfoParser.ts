@@ -39,7 +39,7 @@ export const parseNavStateUrl = (url: URL): TWorkUrlInfo => {
 
 export const workInfoEvent = z.object({
   url: z.url(),
-  authorUrl: z.url(),
+  authorUrl: z.string(),
   chapterName: z.string().optional(),
   chapterNumber: z.string().optional(),
   totalChapters: z.string(),

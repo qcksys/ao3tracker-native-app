@@ -5,9 +5,8 @@ import { useLocalSearchParams } from "expo-router";
 import { StyleSheet } from "react-native";
 
 export default function TabReadScreen() {
-  const { uri, scroll } = useLocalSearchParams<{
+  const { uri } = useLocalSearchParams<{
     uri?: string;
-    scroll?: string;
   }>();
   const initialUri =
     typeof uri === "string" ? uri : "https://archiveofourown.org/";
@@ -18,9 +17,6 @@ export default function TabReadScreen() {
         source={{
           uri: initialUri,
         }}
-        scrollPosition={
-          Number.isNaN(Number(scroll)) ? undefined : Number(scroll)
-        }
       />
     </ThemedView>
   );

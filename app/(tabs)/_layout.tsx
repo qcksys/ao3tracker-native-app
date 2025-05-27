@@ -23,7 +23,6 @@ export default function TabLayout() {
           default: {},
         }),
       }}
-      initialRouteName="read"
     >
       <Tabs.Screen
         name="read"

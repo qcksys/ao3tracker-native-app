@@ -1,6 +1,5 @@
 import { buildConflictUpdateColumns, db } from "@/db/drizzle";
-import { tChapters } from "@/db/schema/chapters";
-import { tWorks } from "@/db/schema/works";
+import { tChapters, tWorks } from "@/db/schema";
 import {
   parseNavStateUrl,
   parseWorkInfoEvent,
@@ -19,9 +18,7 @@ import {
 } from "react-native-webview";
 import injectedJavaScript from "../util/injectedJavaScript.webjs";
 
-const TrackedWebView: React.FC<WebViewProps & { scrollPosition?: number }> = (
-  props,
-) => {
+const TrackedWebView: React.FC<WebViewProps> = (props) => {
   const webviewRef = useRef<WebView>(null);
   const [lastNavState, setLastNavState] = useState<URL>(
     new URL(props.source && "uri" in props.source ? props.source.uri : ""),
@@ -109,7 +106,7 @@ const TrackedWebView: React.FC<WebViewProps & { scrollPosition?: number }> = (
                 const chapterInsert = await db
                   .insert(tChapters)
                   .values({
-                    id: workInfo.workUrlData.chapterId,
+                    id: workInfo.workUrlData.chapterId ?? 0,
                     workId: workInfo.workUrlData.workId,
                     title: workInfo.chapterName,
                     chapterNumber: workInfo.chapterNumber,
@@ -126,7 +123,7 @@ const TrackedWebView: React.FC<WebViewProps & { scrollPosition?: number }> = (
                 console.log("workInfo DB Update", workInsert, chapterInsert);
               }
             } else {
-              console.error("Error parsing workInfo", parsed);
+              console.error("Error parsing workInfo", parsed, eventData);
             }
             return;
           }
