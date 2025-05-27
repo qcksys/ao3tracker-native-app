@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "qcksys",
     "name": "ao3tracker-native-app",
     "slug": "ao3tracker-native-app",
     "version": "1.0.0",
@@ -38,6 +39,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c0e25c2a-2587-4d0f-a638-efb329092725"
+      }
     }
   }
 }
