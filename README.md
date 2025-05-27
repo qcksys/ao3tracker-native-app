@@ -1,5 +1,7 @@
 # AO3 Tracker - React Native
 
+## [Todo](TODO.md)
+
 ## Get started
 
 1. Install dependencies

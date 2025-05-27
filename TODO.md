@@ -1,0 +1,4 @@
+- Include tags/fandom/char data when saving work (for searching tracked works/display)
+- Option to download tracked works
+- Cloud sync
+- History stack better integrated with browser on read tab

@@ -19,7 +19,9 @@ import {
 } from "react-native-webview";
 import injectedJavaScript from "../util/injectedJavaScript.webjs";
 
-const TrackedWebView: React.FC<WebViewProps> = (props) => {
+const TrackedWebView: React.FC<WebViewProps & { scrollPosition?: number }> = (
+  props,
+) => {
   const webviewRef = useRef<WebView>(null);
   const [lastNavState, setLastNavState] = useState<URL>(
     new URL(props.source && "uri" in props.source ? props.source.uri : ""),
