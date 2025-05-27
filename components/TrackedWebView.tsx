@@ -8,8 +8,10 @@ import {
 } from "@/util/workInfoParser";
 import { and, eq } from "drizzle-orm";
 import type React from "react";
+import { useEffect } from "react";
 import { useState } from "react";
 import { useRef } from "react";
+import { BackHandler } from "react-native";
 import {
   WebView,
   type WebViewNavigation,
@@ -45,6 +47,29 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
       }
     }
   };
+
+  useEffect(() => {
+    const handleBackButtonPress = () => {
+      try {
+        webviewRef.current?.goBack();
+      } catch (err) {
+        console.log(
+          "[handleBackButtonPress] Error : ",
+          err instanceof Error ? err.message : err,
+        );
+      }
+
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackButtonPress,
+    );
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
 
   return (
     <WebView

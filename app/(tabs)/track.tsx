@@ -3,12 +3,14 @@ import { ThemedView } from "@/components/ThemedView";
 import { db } from "@/db/drizzle";
 import { tChapters } from "@/db/schema/chapters";
 import { tWorks } from "@/db/schema/works";
+import { useNavigation } from "@react-navigation/native";
 import { eq, max } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import Constants from "expo-constants";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 export default function TabTrackerScreen() {
+  const navigation = useNavigation();
   const { data } = useLiveQuery(
     db
       .select({
@@ -16,6 +18,7 @@ export default function TabTrackerScreen() {
         title: tWorks.title,
         totalChapters: tWorks.chapters,
         highestChapterNumber: max(tChapters.chapterNumber),
+        highestChapterId: max(tChapters.id), //TODO This is not the correct ID
         lastUpdated: tWorks.lastUpdated,
       })
       .from(tWorks)
@@ -61,7 +64,14 @@ export default function TabTrackerScreen() {
           </View>
 
           {data.map((work) => (
-            <View key={work.id} style={styles.tableRow}>
+            <Pressable
+              key={work.id}
+              style={styles.tableRow}
+              onPress={() => {
+                const workUrl = `https://archiveofourown.org/works/${work.id}${work.highestChapterId ? `/chapters/${work.highestChapterId}` : ""}`;
+                navigation.navigate("index", { uri: workUrl });
+              }}
+            >
               <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
               <ThemedText style={[styles.tableCell]}>
                 {work.highestChapterNumber}
@@ -72,7 +82,7 @@ export default function TabTrackerScreen() {
               <ThemedText style={[styles.tableCell]}>
                 {work.lastUpdated ? work.lastUpdated.toString() : "N/A"}
               </ThemedText>
-            </View>
+            </Pressable>
           ))}
         </ScrollView>
       )}
