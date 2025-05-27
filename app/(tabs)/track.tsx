@@ -3,26 +3,44 @@ import { ThemedView } from "@/components/ThemedView";
 import { db } from "@/db/drizzle";
 import { tChapters } from "@/db/schema/chapters";
 import { tWorks } from "@/db/schema/works";
-import { eq, max } from "drizzle-orm";
+import { and, eq, max } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 export default function TabTrackerScreen() {
+  const maxChapterNumberSubquery = db
+    .select({
+      workId: tChapters.workId,
+      maxChapterNum: max(tChapters.chapterNumber).as("max_chapter_num"),
+    })
+    .from(tChapters)
+    .groupBy(tChapters.workId)
+    .as("mcn");
   const { data } = useLiveQuery(
     db
       .select({
         id: tWorks.id,
         title: tWorks.title,
         totalChapters: tWorks.chapters,
-        highestChapterNumber: max(tChapters.chapterNumber),
-        highestChapterId: max(tChapters.id), //TODO This is not the correct ID
+        highestChapterNumber: tChapters.chapterNumber,
+        highestChapterId: tChapters.id,
+        highestChapterProgress: tChapters.lastChapterProgress,
         lastUpdated: tWorks.lastUpdated,
       })
       .from(tWorks)
-      .leftJoin(tChapters, eq(tWorks.id, tChapters.workId))
-      .groupBy(tWorks.id, tWorks.title, tWorks.lastUpdated),
+      .leftJoin(
+        maxChapterNumberSubquery,
+        eq(tWorks.id, maxChapterNumberSubquery.workId),
+      )
+      .leftJoin(
+        tChapters,
+        and(
+          eq(tChapters.workId, tWorks.id),
+          eq(tChapters.chapterNumber, maxChapterNumberSubquery.maxChapterNum),
+        ),
+      ),
   );
 
   return (
@@ -64,14 +82,21 @@ export default function TabTrackerScreen() {
                 router.navigate({
                   pathname: "/(tabs)/read",
                   params: {
-                    uri: `https://archiveofourown.org/works/${work.id}${work.highestChapterId ? `/chapters/${work.highestChapterId}` : ""}`,
+                    uri: `https://archiveofourown.org/works/${work.id}${
+                      work.highestChapterId
+                        ? `/chapters/${work.highestChapterId}`
+                        : ""
+                    }`,
+                    scroll: work.highestChapterProgress?.toString(),
                   },
                 })
               }
             >
               <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
               <ThemedText style={[styles.tableCell]}>
-                {work.highestChapterNumber}/{work.totalChapters}
+                {work.highestChapterNumber}(
+                {work.highestChapterProgress?.toString() || "0"}%)/
+                {work.totalChapters}
               </ThemedText>
               <ThemedText style={[styles.tableCell]}>
                 {work.lastUpdated
