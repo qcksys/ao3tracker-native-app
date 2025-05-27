@@ -3,14 +3,13 @@ import { ThemedView } from "@/components/ThemedView";
 import { db } from "@/db/drizzle";
 import { tChapters } from "@/db/schema/chapters";
 import { tWorks } from "@/db/schema/works";
-import { useNavigation } from "@react-navigation/native";
 import { eq, max } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import Constants from "expo-constants";
+import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 export default function TabTrackerScreen() {
-  const navigation = useNavigation();
   const { data } = useLiveQuery(
     db
       .select({
@@ -67,10 +66,14 @@ export default function TabTrackerScreen() {
             <Pressable
               key={work.id}
               style={styles.tableRow}
-              onPress={() => {
-                const workUrl = `https://archiveofourown.org/works/${work.id}${work.highestChapterId ? `/chapters/${work.highestChapterId}` : ""}`;
-                navigation.navigate("index", { uri: workUrl });
-              }}
+              onPress={() =>
+                router.navigate({
+                  pathname: "/(tabs)/read",
+                  params: {
+                    uri: `https://archiveofourown.org/works/${work.id}${work.highestChapterId ? `/chapters/${work.highestChapterId}` : ""}`,
+                  },
+                })
+              }
             >
               <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
               <ThemedText style={[styles.tableCell]}>

@@ -23,9 +23,10 @@ export default function TabLayout() {
           default: {},
         }),
       }}
+      initialRouteName="read"
     >
       <Tabs.Screen
-        name="index"
+        name="read"
         options={{
           title: "Read",
           tabBarIcon: ({ color }) => (
