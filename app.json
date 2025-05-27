@@ -1,12 +1,12 @@
 {
   "expo": {
     "owner": "qcksys",
-    "name": "ao3tracker-native-app",
-    "slug": "ao3tracker-native-app",
+    "name": "ao3tracker",
+    "slug": "ao3tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "ao3trackernativeapp",
+    "scheme": "ao3tracker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.qcksys.ao3trackernativeapp"
+      "package": "com.qcksys.ao3tracker"
     },
     "web": {
       "bundler": "metro",
