@@ -46,19 +46,13 @@ export default function TabTrackerScreen() {
               type="subtitle"
               style={[styles.tableCell, styles.headerCell]}
             >
-              Current Chapter
+              Chapter Progress
             </ThemedText>
             <ThemedText
               type="subtitle"
               style={[styles.tableCell, styles.headerCell]}
             >
-              Chapters
-            </ThemedText>
-            <ThemedText
-              type="subtitle"
-              style={[styles.tableCell, styles.headerCell]}
-            >
-              Last Updated
+              Work Last Updated
             </ThemedText>
           </View>
 
@@ -77,13 +71,12 @@ export default function TabTrackerScreen() {
             >
               <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
               <ThemedText style={[styles.tableCell]}>
-                {work.highestChapterNumber}
+                {work.highestChapterNumber}/{work.totalChapters}
               </ThemedText>
               <ThemedText style={[styles.tableCell]}>
-                {work.totalChapters}
-              </ThemedText>
-              <ThemedText style={[styles.tableCell]}>
-                {work.lastUpdated ? work.lastUpdated.toString() : "N/A"}
+                {work.lastUpdated
+                  ? work.lastUpdated.toLocaleDateString()
+                  : "N/A"}
               </ThemedText>
             </Pressable>
           ))}
