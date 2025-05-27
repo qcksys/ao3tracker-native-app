@@ -1,6 +1,6 @@
 CREATE TABLE `chapters` (
-	`id` integer,
-	`workId` integer,
+	`id` integer NOT NULL,
+	`workId` integer NOT NULL,
 	`title` text,
 	`chapterNumber` integer,
 	`lastChapterProgress` integer,
