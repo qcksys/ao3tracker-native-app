@@ -136,24 +136,23 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   titleCell: {
-    width: "45%",
+    width: "40%",
     paddingHorizontal: 5,
   },
   statusCell: {
-    width: "45%",
-    paddingHorizontal: 5,
+    width: "50%",
     justifyContent: "center",
   },
   actionsCell: {
     width: "10%",
-    paddingHorizontal: 5,
     alignItems: "center",
+    paddingHorizontal: 5,
   },
   tableCell: {
     textAlign: "left",
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 14,
   },
   noDataText: {
