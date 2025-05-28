@@ -9,11 +9,21 @@ import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuer
 import { eq } from "drizzle-orm";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  useColorScheme,
+} from "react-native";
 
 type Work = Awaited<typeof worksWithHighestChapter>[number];
 
 export default function TabTrackerScreen() {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
+
   const { data } = useLiveTablesQuery(worksWithHighestChapter, [
     tWorks,
     tChapters,
@@ -51,10 +61,22 @@ export default function TabTrackerScreen() {
       </ThemedText>
 
       {data.length === 0 ? (
-        <ThemedText style={styles.noDataText}>No works tracked yet.</ThemedText>
+        <ThemedText style={[styles.noDataText, { color: colors.icon }]}>
+          No works tracked yet.
+        </ThemedText>
       ) : (
-        <ScrollView style={styles.tableContainer}>
-          <View style={styles.tableHeader}>
+        <ScrollView
+          style={[styles.tableContainer, { borderColor: colors.icon }]}
+        >
+          <View
+            style={[
+              styles.tableHeader,
+              {
+                backgroundColor: colors.overlay,
+                borderBottomColor: colors.icon,
+              },
+            ]}
+          >
             <View style={styles.tableRow}>
               <ThemedText
                 style={[styles.tableCell, styles.headerCell, styles.titleCell]}
@@ -76,7 +98,7 @@ export default function TabTrackerScreen() {
                 <IconSymbol
                   size={24}
                   name="gearshape.fill"
-                  color={Colors.light.icon}
+                  color={colors.icon}
                 />
               </ThemedText>
             </View>
@@ -85,7 +107,7 @@ export default function TabTrackerScreen() {
             {data.map((work) => (
               <Pressable
                 key={work.id}
-                style={styles.tableRow}
+                style={[styles.tableRow, { borderBottomColor: colors.overlay }]}
                 onPress={() => onWorkPress(work)}
               >
                 <ThemedText style={[styles.tableCell, styles.titleCell]}>
@@ -110,7 +132,11 @@ export default function TabTrackerScreen() {
                     confirmDelete(work);
                   }}
                 >
-                  <IconSymbol name="trash.fill" size={20} color="#ff3b30" />
+                  <IconSymbol
+                    name="trash.fill"
+                    size={20}
+                    color={colors.destructive}
+                  />
                 </Pressable>
               </Pressable>
             ))}
@@ -134,18 +160,14 @@ const styles = StyleSheet.create({
   tableContainer: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#ccc",
     overflow: "hidden",
   },
   tableHeader: {
-    backgroundColor: "#f5f5f5",
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
   },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
     paddingVertical: 10,
     backgroundColor: "transparent",
     width: "100%",
@@ -172,16 +194,14 @@ const styles = StyleSheet.create({
   },
   statusText: {
     textAlign: "left",
-    fontSize: 12, // Reduced font size for status and date
+    fontSize: 12,
   },
   noDataText: {
     textAlign: "center",
     marginTop: 50,
     fontSize: 18,
-    color: "#888",
   },
   errorText: {
-    color: "red",
     textAlign: "center",
     marginTop: 20,
   },

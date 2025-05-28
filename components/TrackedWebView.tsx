@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { db } from "@/db/drizzle";
 import { tChapters, tWorks } from "@/db/schema";
 import {
@@ -11,7 +12,13 @@ import type React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useRef } from "react";
-import { ActivityIndicator, BackHandler, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  BackHandler,
+  StyleSheet,
+  View,
+  useColorScheme,
+} from "react-native";
 import {
   WebView,
   type WebViewMessageEvent,
@@ -20,6 +27,8 @@ import {
 } from "react-native-webview";
 
 const TrackedWebView: React.FC<WebViewProps> = (props) => {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
   const webviewRef = useRef<WebView>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentUrl, setCurrentUrl] = useState<string>(
@@ -155,7 +164,14 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
         onError={() => setIsLoading(false)}
       />
       {isLoading && (
-        <View style={styles.loadingOverlay}>
+        <View
+          style={[
+            styles.loadingOverlay,
+            {
+              backgroundColor: colors.overlay,
+            },
+          ]}
+        >
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
       )}
@@ -174,7 +190,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
     alignItems: "center",
     justifyContent: "center",
   },
