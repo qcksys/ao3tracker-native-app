@@ -2,15 +2,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
-import { db } from "@/db/drizzle";
 import { worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tWorks } from "@/db/schema";
 import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
-import { eq } from "drizzle-orm";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -28,31 +25,6 @@ export default function TabTrackerScreen() {
     tWorks,
     tChapters,
   ]);
-
-  const deleteWork = async (workId: number) => {
-    try {
-      await db.delete(tChapters).where(eq(tChapters.workId, workId));
-      await db.delete(tWorks).where(eq(tWorks.id, workId));
-    } catch (error) {
-      console.error("Failed to delete work:", error);
-      Alert.alert("Error", `Failed to delete the work. ${error}`);
-    }
-  };
-
-  const confirmDelete = (work: Work) => {
-    Alert.alert(
-      "Delete Work",
-      `Are you sure you want to delete "${work.title}" from your tracking history?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => deleteWork(work.id),
-        },
-      ],
-    );
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -76,11 +48,6 @@ export default function TabTrackerScreen() {
               style={[styles.tableCell, styles.headerCell, styles.statusCell]}
             >
               Info
-            </ThemedText>
-            <ThemedText
-              style={[styles.tableCell, styles.headerCell, styles.actionsCell]}
-            >
-              <IconSymbol size={24} name="gearshape.fill" color={colors.icon} />
             </ThemedText>
           </View>
           <ScrollView>
@@ -110,16 +77,18 @@ export default function TabTrackerScreen() {
                     </ThemedText>
                   </View>
                   <Pressable
-                    style={[styles.deleteButton, styles.actionsCell]}
+                    style={[styles.actionsCell]}
                     onPress={(e) => {
                       e.stopPropagation();
-                      confirmDelete(work);
+                      router.navigate({
+                        pathname: "/(tabs)/work",
+                      });
                     }}
                   >
                     <IconSymbol
-                      name="trash.fill"
-                      size={20}
-                      color={colors.destructive}
+                      size={40}
+                      name="list.bullet"
+                      color={colors.primary}
                     />
                   </Pressable>
                 </Pressable>
