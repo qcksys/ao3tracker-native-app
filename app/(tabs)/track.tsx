@@ -2,8 +2,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { db } from "@/db/drizzle";
 import { tChapters, tWorks } from "@/db/schema";
+import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
 import { and, eq, max } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -17,7 +17,7 @@ export default function TabTrackerScreen() {
     .from(tChapters)
     .groupBy(tChapters.workId)
     .as("mcn");
-  const { data } = useLiveQuery(
+  const { data } = useLiveTablesQuery(
     db
       .select({
         id: tWorks.id,
@@ -40,6 +40,7 @@ export default function TabTrackerScreen() {
           eq(tChapters.chapterNumber, maxChapterNumberSubquery.maxChapterNum),
         ),
       ),
+    [tWorks, tChapters],
   );
 
   return (
@@ -83,7 +84,7 @@ export default function TabTrackerScreen() {
                     work.highestChapterId
                       ? `/chapters/${work.highestChapterId}`
                       : ""
-                  }`,
+                  }#workskin`,
                 );
                 if (work.highestChapterProgress) {
                   workUrl.searchParams.set(

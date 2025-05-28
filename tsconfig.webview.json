@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["DOM", "ESNext"],
+    "types": [],
+    "target": "ES2016"
+  },
+  "include": ["injectedWebviewScripts/**/*.ts"]
+}

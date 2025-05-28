@@ -11,6 +11,8 @@ export default function TabReadScreen() {
   const initialUri =
     typeof uri === "string" ? uri : "https://archiveofourown.org/";
 
+  console.log("opening browser on", initialUri);
+
   return (
     <ThemedView style={styles.container}>
       <TrackedWebView

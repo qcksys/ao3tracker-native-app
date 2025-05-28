@@ -12,5 +12,6 @@
     ".expo/types/**/*.ts",
     "*.d.ts",
     "expo-env.d.ts"
-  ]
+  ],
+  "exclude": ["injectedWebviewScripts"]
 }
