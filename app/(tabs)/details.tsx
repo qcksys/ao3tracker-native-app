@@ -60,7 +60,7 @@ export default function TabTrackerScreen() {
 
         <ThemedView style={styles.workInfoRow}>
           <ThemedText>
-            Last Updated: {work.lastUpdated?.toLocaleDateString() || "Unknown"}
+            Last Updated: {work.lastUpdated?.toLocaleString() || "Unknown"}
           </ThemedText>
           <Pressable
             style={styles.deleteWorkButton}
@@ -79,13 +79,17 @@ export default function TabTrackerScreen() {
             </ThemedText>
           </Pressable>
         </ThemedView>
+        <ThemedView style={styles.workInfoRow}>
+          <ThemedText>
+            Last Read: {work.lastRead?.toLocaleString() || "Unknown"}
+          </ThemedText>
+        </ThemedView>
       </ThemedView>
       <ScrollView style={styles.scrollContainer}>
         <ThemedView style={styles.chaptersContainer}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>
             Chapters
           </ThemedText>
-
           {chapters && chapters.length > 0 ? (
             chapters.map((chapter) => (
               <Pressable
@@ -158,7 +162,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
   },
   summary: {
     marginTop: 10,
