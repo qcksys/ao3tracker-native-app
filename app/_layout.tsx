@@ -4,7 +4,6 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { useFonts } from "expo-font";
 import { Redirect, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
@@ -22,12 +21,8 @@ export default function RootLayout() {
   useSQLiteDevTools(expoDb);
 
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
 
-  if (!loaded || !migration.success) {
-    // Async font loading only occurs in development.
+  if (!migration.success) {
     return null;
   }
 
