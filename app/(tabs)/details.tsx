@@ -57,7 +57,6 @@ export default function TabTrackerScreen() {
         <ThemedText type="title" style={styles.title}>
           {work.title || "Untitled Work"}
         </ThemedText>
-
         <ThemedView style={styles.workInfoRow}>
           <ThemedText>
             Last Updated: {work.lastUpdated?.toLocaleString() || "Unknown"}
@@ -74,9 +73,6 @@ export default function TabTrackerScreen() {
               name="trash.fill"
               color={colors.destructive}
             />
-            <ThemedText style={{ color: colors.destructive }}>
-              Delete Work
-            </ThemedText>
           </Pressable>
         </ThemedView>
         <ThemedView style={styles.workInfoRow}>

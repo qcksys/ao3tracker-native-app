@@ -96,7 +96,7 @@ export default function TabSettingsScreen() {
                 styles.jsonContainer,
                 {
                   borderColor: colors.border,
-                  backgroundColor: colors.muted,
+                  backgroundColor: colors.accent,
                 },
               ]}
             >
