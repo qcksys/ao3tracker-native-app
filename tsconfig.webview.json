@@ -1,9 +1,22 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "lib": ["DOM", "ESNext"],
     "types": [],
-    "target": "ES2016"
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "allowJs": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noPropertyAccessFromIndexSignature": true
   },
-  "include": ["injectedWebviewScripts/**/*.ts"]
+  "include": ["./injectedWebviewScripts/**/*.ts"]
 }

@@ -8,7 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "build:webview": "tsc --project tsconfig.webview.json",
+    "build:webview": "bun buildWebViews.ts",
     "build:android:development": "eas build --platform android --local --profile development",
     "build:android:preview": "eas build --platform android --local --profile preview",
     "build:android:apk": "expo prebuild && cd android && gradlew app:assembleRelease",
@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.2.14",
     "@types/react": "~19.0.10",
     "drizzle-kit": "^0.31.1",
     "typescript": "~5.8.3"

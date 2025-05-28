@@ -24,7 +24,7 @@ export default function TabTrackerScreen() {
     tChapters,
   ]);
 
-  const deleteWork = async (workId: string) => {
+  const deleteWork = async (workId: number) => {
     try {
       await db.delete(tChapters).where(eq(tChapters.workId, workId));
       await db.delete(tWorks).where(eq(tWorks.id, workId));
