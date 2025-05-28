@@ -113,6 +113,7 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
                   title: workInfo.workName,
                   chapters: workInfo.totalChapters,
                   lastUpdated: workInfo.workLastUpdated,
+                  lastRead: new Date(),
                 })
                 .onConflictDoUpdate(onConflictDoUpdateConfig(tWorks));
 

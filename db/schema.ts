@@ -11,6 +11,7 @@ export const tWorks = sqliteTable("works", {
   title: text(),
   chapters: integer({ mode: "number" }),
   lastUpdated: integer({ mode: "timestamp" }),
+  lastRead: integer({ mode: "timestamp" }),
 });
 
 export const sWorksI = createInsertSchema(tWorks);

@@ -66,14 +66,20 @@ export default function TabTrackerScreen() {
                   </ThemedText>
                   <View style={styles.statusCell}>
                     <ThemedText style={[styles.tableCell, styles.statusText]}>
-                      Chapter: {work.highestChapterNumber}(
-                      {work.highestChapterProgress?.toString() || "0"}%)/
-                      {work.totalChapters}
+                      Chapter: {work.highestChapterNumber}/{work.totalChapters}{" "}
+                      ({work.highestChapterProgress?.toString() || "0"}%)
                     </ThemedText>
                     <ThemedText style={[styles.tableCell, styles.statusText]}>
+                      Updated:{" "}
                       {work.lastUpdated
-                        ? `Updated: ${work.lastUpdated?.toLocaleDateString()}`
+                        ? work.lastUpdated?.toLocaleDateString()
                         : "N/A"}
+                    </ThemedText>
+                    <ThemedText style={[styles.tableCell, styles.statusText]}>
+                      Read:{" "}
+                      {work.lastRead
+                        ? work.lastRead?.toLocaleString()
+                        : "Never"}
                     </ThemedText>
                   </View>
                   <Pressable
@@ -130,11 +136,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   titleCell: {
-    width: "50%",
+    width: "45%",
     paddingHorizontal: 5,
   },
   statusCell: {
-    width: "40%",
+    width: "45%",
     paddingHorizontal: 5,
     justifyContent: "center",
   },
@@ -147,8 +153,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   statusText: {
-    textAlign: "left",
     fontSize: 12,
+    lineHeight: 14,
   },
   noDataText: {
     textAlign: "center",
