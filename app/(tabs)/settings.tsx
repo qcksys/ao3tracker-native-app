@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
 import { db } from "@/db/drizzle";
 import { tChapters, tWorks } from "@/db/schema";
 import Constants from "expo-constants";
@@ -14,10 +15,13 @@ import {
   Share,
   StyleSheet,
   View,
+  useColorScheme,
 } from "react-native";
 
 export default function TabSettingsScreen() {
   const [jsonData, setJsonData] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
 
   const exportDbAsJson = async () => {
     try {
@@ -69,28 +73,46 @@ export default function TabSettingsScreen() {
         Settings
       </ThemedText>
 
-      <View style={styles.settingSection}>
+      <View
+        style={[styles.settingSection, { borderBottomColor: colors.border }]}
+      >
         <ThemedText type="subtitle" style={styles.sectionTitle}>
           Database
         </ThemedText>
 
-        <Pressable style={styles.settingButton} onPress={exportDbAsJson}>
-          <ThemedText style={styles.buttonText}>
+        <Pressable
+          style={[styles.settingButton, { backgroundColor: colors.primary }]}
+          onPress={exportDbAsJson}
+        >
+          <ThemedText style={[styles.buttonText, { color: colors.buttonText }]}>
             Export Database as JSON
           </ThemedText>
         </Pressable>
 
         {jsonData && (
           <>
-            <ScrollView style={styles.jsonContainer}>
+            <ScrollView
+              style={[
+                styles.jsonContainer,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.codeBackground,
+                },
+              ]}
+            >
               <ThemedText style={styles.jsonText}>{jsonData}</ThemedText>
             </ScrollView>
 
             <Pressable
-              style={[styles.settingButton, styles.clearButton]}
+              style={[
+                styles.settingButton,
+                { backgroundColor: colors.destructive },
+              ]}
               onPress={clearDisplayedJson}
             >
-              <ThemedText style={styles.buttonText}>
+              <ThemedText
+                style={[styles.buttonText, { color: colors.buttonText }]}
+              >
                 Clear JSON Display
               </ThemedText>
             </Pressable>
@@ -98,7 +120,9 @@ export default function TabSettingsScreen() {
         )}
       </View>
 
-      <View style={styles.settingSection}>
+      <View
+        style={[styles.settingSection, { borderBottomColor: colors.border }]}
+      >
         <ThemedText type="subtitle" style={styles.sectionTitle}>
           About
         </ThemedText>
@@ -121,34 +145,26 @@ const styles = StyleSheet.create({
   settingSection: {
     marginBottom: 24,
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
     paddingBottom: 16,
   },
   sectionTitle: {
     marginBottom: 12,
   },
   settingButton: {
-    backgroundColor: "#007AFF",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
     marginVertical: 8,
   },
-  clearButton: {
-    backgroundColor: "#FF3B30",
-  },
   buttonText: {
-    color: "#FFFFFF",
     fontWeight: "500",
   },
   jsonContainer: {
     marginTop: 16,
     maxHeight: 300,
     borderWidth: 1,
-    borderColor: "#ccc",
     borderRadius: 8,
     padding: 8,
-    backgroundColor: "#f7f7f7",
   },
   jsonText: {
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
