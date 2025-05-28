@@ -65,83 +65,68 @@ export default function TabTrackerScreen() {
           No works tracked yet.
         </ThemedText>
       ) : (
-        <ScrollView
-          style={[styles.tableContainer, { borderColor: colors.icon }]}
-        >
-          <View
-            style={[
-              styles.tableHeader,
-              {
-                backgroundColor: colors.overlay,
-                borderBottomColor: colors.icon,
-              },
-            ]}
-          >
-            <View style={styles.tableRow}>
-              <ThemedText
-                style={[styles.tableCell, styles.headerCell, styles.titleCell]}
-              >
-                Title
-              </ThemedText>
-              <ThemedText
-                style={[styles.tableCell, styles.headerCell, styles.statusCell]}
-              >
-                Info
-              </ThemedText>
-              <ThemedText
-                style={[
-                  styles.tableCell,
-                  styles.headerCell,
-                  styles.actionsCell,
-                ]}
-              >
-                <IconSymbol
-                  size={24}
-                  name="gearshape.fill"
-                  color={colors.icon}
-                />
-              </ThemedText>
-            </View>
+        <View style={[styles.tableContainer, { borderColor: colors.icon }]}>
+          <View style={styles.tableRow}>
+            <ThemedText
+              style={[styles.tableCell, styles.headerCell, styles.titleCell]}
+            >
+              Title
+            </ThemedText>
+            <ThemedText
+              style={[styles.tableCell, styles.headerCell, styles.statusCell]}
+            >
+              Info
+            </ThemedText>
+            <ThemedText
+              style={[styles.tableCell, styles.headerCell, styles.actionsCell]}
+            >
+              <IconSymbol size={24} name="gearshape.fill" color={colors.icon} />
+            </ThemedText>
           </View>
-          <View>
-            {data.map((work) => (
-              <Pressable
-                key={work.id}
-                style={[styles.tableRow, { borderBottomColor: colors.border }]}
-                onPress={() => onWorkPress(work)}
-              >
-                <ThemedText style={[styles.tableCell, styles.titleCell]}>
-                  {work.title}
-                </ThemedText>
-                <View style={styles.statusCell}>
-                  <ThemedText style={[styles.tableCell, styles.statusText]}>
-                    Chapter: {work.highestChapterNumber}(
-                    {work.highestChapterProgress?.toString() || "0"}%)/
-                    {work.totalChapters}
-                  </ThemedText>
-                  <ThemedText style={[styles.tableCell, styles.statusText]}>
-                    {work.lastUpdated
-                      ? `Updated: ${work.lastUpdated?.toLocaleDateString()}`
-                      : "N/A"}
-                  </ThemedText>
-                </View>
+          <ScrollView>
+            <View>
+              {data.map((work) => (
                 <Pressable
-                  style={[styles.deleteButton, styles.actionsCell]}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    confirmDelete(work);
-                  }}
+                  key={work.id}
+                  style={[
+                    styles.tableRow,
+                    { borderBottomColor: colors.border },
+                  ]}
+                  onPress={() => onWorkPress(work)}
                 >
-                  <IconSymbol
-                    name="trash.fill"
-                    size={20}
-                    color={colors.destructive}
-                  />
+                  <ThemedText style={[styles.tableCell, styles.titleCell]}>
+                    {work.title}
+                  </ThemedText>
+                  <View style={styles.statusCell}>
+                    <ThemedText style={[styles.tableCell, styles.statusText]}>
+                      Chapter: {work.highestChapterNumber}(
+                      {work.highestChapterProgress?.toString() || "0"}%)/
+                      {work.totalChapters}
+                    </ThemedText>
+                    <ThemedText style={[styles.tableCell, styles.statusText]}>
+                      {work.lastUpdated
+                        ? `Updated: ${work.lastUpdated?.toLocaleDateString()}`
+                        : "N/A"}
+                    </ThemedText>
+                  </View>
+                  <Pressable
+                    style={[styles.deleteButton, styles.actionsCell]}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      confirmDelete(work);
+                    }}
+                  >
+                    <IconSymbol
+                      name="trash.fill"
+                      size={20}
+                      color={colors.destructive}
+                    />
+                  </Pressable>
                 </Pressable>
-              </Pressable>
-            ))}
-          </View>
-        </ScrollView>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
       )}
     </ThemedView>
   );
@@ -161,9 +146,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     overflow: "hidden",
-  },
-  tableHeader: {
-    borderBottomWidth: 1,
   },
   tableRow: {
     flexDirection: "row",
