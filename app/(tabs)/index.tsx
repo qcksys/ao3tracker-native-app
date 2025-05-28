@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Colors } from "@/constants/Colors";
 import { db } from "@/db/drizzle";
 import { worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tWorks } from "@/db/schema";
@@ -55,17 +56,28 @@ export default function TabTrackerScreen() {
         <ScrollView style={styles.tableContainer}>
           <View style={styles.tableHeader}>
             <View style={styles.tableRow}>
-              <ThemedText style={[styles.tableCell, styles.headerCell]}>
+              <ThemedText
+                style={[styles.tableCell, styles.headerCell, styles.titleCell]}
+              >
                 Title
               </ThemedText>
-              <ThemedText style={[styles.tableCell, styles.headerCell]}>
-                Status
+              <ThemedText
+                style={[styles.tableCell, styles.headerCell, styles.statusCell]}
+              >
+                Status/Date
               </ThemedText>
-              <ThemedText style={[styles.tableCell, styles.headerCell]}>
-                Date
-              </ThemedText>
-              <ThemedText style={[styles.tableCell, styles.headerCell]}>
-                Actions
+              <ThemedText
+                style={[
+                  styles.tableCell,
+                  styles.headerCell,
+                  styles.actionsCell,
+                ]}
+              >
+                <IconSymbol
+                  size={24}
+                  name="gearshape.fill"
+                  color={Colors.light.icon}
+                />
               </ThemedText>
             </View>
           </View>
@@ -76,19 +88,23 @@ export default function TabTrackerScreen() {
                 style={styles.tableRow}
                 onPress={() => onWorkPress(work)}
               >
-                <ThemedText style={styles.tableCell}>{work.title}</ThemedText>
-                <ThemedText style={styles.tableCell}>
-                  {work.highestChapterNumber}(
-                  {work.highestChapterProgress?.toString() || "0"}%)/
-                  {work.totalChapters}
+                <ThemedText style={[styles.tableCell, styles.titleCell]}>
+                  {work.title}
                 </ThemedText>
-                <ThemedText style={styles.tableCell}>
-                  {work.lastUpdated
-                    ? work.lastUpdated?.toLocaleDateString()
-                    : "N/A"}
-                </ThemedText>
+                <View style={styles.statusCell}>
+                  <ThemedText style={[styles.tableCell, styles.statusText]}>
+                    Chapter: {work.highestChapterNumber}(
+                    {work.highestChapterProgress?.toString() || "0"}%)/
+                    {work.totalChapters}
+                  </ThemedText>
+                  <ThemedText style={[styles.tableCell, styles.statusText]}>
+                    {work.lastUpdated
+                      ? `Updated: ${work.lastUpdated?.toLocaleDateString()}`
+                      : "N/A"}
+                  </ThemedText>
+                </View>
                 <Pressable
-                  style={styles.deleteButton}
+                  style={[styles.deleteButton, styles.actionsCell]}
                   onPress={(e) => {
                     e.stopPropagation();
                     confirmDelete(work);
@@ -132,20 +148,31 @@ const styles = StyleSheet.create({
     borderBottomColor: "#eee",
     paddingVertical: 10,
     backgroundColor: "transparent",
+    width: "100%",
   },
   headerCell: {
     fontWeight: "bold",
   },
-  headerCellContainer: {
-    flex: 1,
+  titleCell: {
+    width: "50%",
     paddingHorizontal: 5,
   },
-  cellContainer: {
-    flex: 1,
+  statusCell: {
+    width: "40%",
     paddingHorizontal: 5,
+    justifyContent: "center",
+  },
+  actionsCell: {
+    width: "10%",
+    paddingHorizontal: 5,
+    alignItems: "center",
   },
   tableCell: {
-    textAlign: "center",
+    textAlign: "left",
+  },
+  statusText: {
+    textAlign: "left",
+    fontSize: 12, // Reduced font size for status and date
   },
   noDataText: {
     textAlign: "center",
