@@ -11,7 +11,9 @@
     "build:webview": "bun buildWebViews.ts",
     "build:android:development": "eas build --platform android --local --profile development",
     "build:android:preview": "eas build --platform android --local --profile preview",
+    "build:android:production": "eas build --platform android --local --profile production",
     "build:android:apk": "expo prebuild && cd android && gradlew app:assembleRelease",
+    "build:android:aab": "expo prebuild && cd android && gradlew app:bundleRelease",
     "db:generate": "drizzle-kit generate",
     "biome:check:unsafe": "biome check --write --unsafe",
     "biome:ci": "biome ci"
