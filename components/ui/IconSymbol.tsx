@@ -21,6 +21,7 @@ const MAPPING = {
   "book.fill": "book",
   "list.bullet": "list",
   "gearshape.fill": "settings",
+  "trash.fill": "delete",
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
 } as IconMapping;

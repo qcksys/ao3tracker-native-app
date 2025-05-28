@@ -1,5 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { db } from "@/db/drizzle";
 import { worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tWorks } from "@/db/schema";
 import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
@@ -9,9 +11,10 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { eq } from "drizzle-orm";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 type Work = Awaited<typeof worksWithHighestChapter>[number];
 
@@ -20,6 +23,31 @@ export default function TabTrackerScreen() {
     tWorks,
     tChapters,
   ]);
+
+  const deleteWork = async (workId: string) => {
+    try {
+      await db.delete(tChapters).where(eq(tChapters.workId, workId));
+      await db.delete(tWorks).where(eq(tWorks.id, workId));
+    } catch (error) {
+      console.error("Failed to delete work:", error);
+      Alert.alert("Error", `Failed to delete the work. ${error}`);
+    }
+  };
+
+  const confirmDelete = (work: Work) => {
+    Alert.alert(
+      "Delete Work",
+      `Are you sure you want to delete "${work.title}" from your tracking history?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteWork(work.id),
+        },
+      ],
+    );
+  };
 
   const columnHelper = createColumnHelper<Work>();
 
@@ -47,10 +75,28 @@ export default function TabTrackerScreen() {
     columnHelper.accessor("lastUpdated", {
       cell: (info) => (
         <ThemedText style={styles.tableCell}>
-          {info.getValue() ? info.getValue().toLocaleDateString() : "N/A"}
+          {info.getValue() ? info.getValue()?.toLocaleDateString() : "N/A"}
         </ThemedText>
       ),
       header: "Updated",
+    }),
+    columnHelper.accessor((row) => row, {
+      id: "actions",
+      cell: (info) => {
+        const work = info.getValue();
+        return (
+          <Pressable
+            style={styles.deleteButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              confirmDelete(work);
+            }}
+          >
+            <IconSymbol name="trash.fill" size={20} color="#ff3b30" />
+          </Pressable>
+        );
+      },
+      header: "Actions",
     }),
   ];
 
@@ -162,6 +208,11 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
     marginTop: 20,
+  },
+  deleteButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 5,
   },
 });
 
