@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "build:webview": "tsc --project tsconfig.webview.json",
+    "build:android:development": "eas build --platform android --local --profile development",
     "db:generate": "drizzle-kit generate",
     "biome:check:unsafe": "biome check --write --unsafe",
     "biome:ci": "biome ci"
