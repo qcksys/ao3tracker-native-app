@@ -5,12 +5,6 @@ import { db } from "@/db/drizzle";
 import { worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tWorks } from "@/db/schema";
 import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { eq } from "drizzle-orm";
 import Constants from "expo-constants";
 import { router } from "expo-router";
@@ -49,63 +43,6 @@ export default function TabTrackerScreen() {
     );
   };
 
-  const columnHelper = createColumnHelper<Work>();
-
-  const columns = [
-    columnHelper.accessor("title", {
-      cell: (info) => (
-        <ThemedText style={styles.tableCell}>{info.getValue()}</ThemedText>
-      ),
-      header: "Title",
-    }),
-    columnHelper.accessor((row) => row, {
-      id: "progress",
-      cell: (info) => {
-        const work = info.getValue();
-        return (
-          <ThemedText style={styles.tableCell}>
-            {work.highestChapterNumber}(
-            {work.highestChapterProgress?.toString() || "0"}%)/
-            {work.totalChapters}
-          </ThemedText>
-        );
-      },
-      header: "Progress",
-    }),
-    columnHelper.accessor("lastUpdated", {
-      cell: (info) => (
-        <ThemedText style={styles.tableCell}>
-          {info.getValue() ? info.getValue()?.toLocaleDateString() : "N/A"}
-        </ThemedText>
-      ),
-      header: "Updated",
-    }),
-    columnHelper.accessor((row) => row, {
-      id: "actions",
-      cell: (info) => {
-        const work = info.getValue();
-        return (
-          <Pressable
-            style={styles.deleteButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              confirmDelete(work);
-            }}
-          >
-            <IconSymbol name="trash.fill" size={20} color="#ff3b30" />
-          </Pressable>
-        );
-      },
-      header: "Actions",
-    }),
-  ];
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>
@@ -117,36 +54,48 @@ export default function TabTrackerScreen() {
       ) : (
         <ScrollView style={styles.tableContainer}>
           <View style={styles.tableHeader}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <View key={headerGroup.id} style={styles.tableRow}>
-                {headerGroup.headers.map((header) => (
-                  <View key={header.id} style={styles.headerCellContainer}>
-                    <ThemedText style={[styles.tableCell, styles.headerCell]}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </ThemedText>
-                  </View>
-                ))}
-              </View>
-            ))}
+            <View style={styles.tableRow}>
+              <ThemedText style={[styles.tableCell, styles.headerCell]}>
+                Title
+              </ThemedText>
+              <ThemedText style={[styles.tableCell, styles.headerCell]}>
+                Status
+              </ThemedText>
+              <ThemedText style={[styles.tableCell, styles.headerCell]}>
+                Date
+              </ThemedText>
+              <ThemedText style={[styles.tableCell, styles.headerCell]}>
+                Actions
+              </ThemedText>
+            </View>
           </View>
-
           <View>
-            {table.getRowModel().rows.map((row) => (
+            {data.map((work) => (
               <Pressable
-                key={row.id}
+                key={work.id}
                 style={styles.tableRow}
-                onPress={() => onWorkPress(row.original)}
+                onPress={() => onWorkPress(work)}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <View key={cell.id} style={styles.cellContainer}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </View>
-                ))}
+                <ThemedText style={styles.tableCell}>{work.title}</ThemedText>
+                <ThemedText style={styles.tableCell}>
+                  {work.highestChapterNumber}(
+                  {work.highestChapterProgress?.toString() || "0"}%)/
+                  {work.totalChapters}
+                </ThemedText>
+                <ThemedText style={styles.tableCell}>
+                  {work.lastUpdated
+                    ? work.lastUpdated?.toLocaleDateString()
+                    : "N/A"}
+                </ThemedText>
+                <Pressable
+                  style={styles.deleteButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    confirmDelete(work);
+                  }}
+                >
+                  <IconSymbol name="trash.fill" size={20} color="#ff3b30" />
+                </Pressable>
               </Pressable>
             ))}
           </View>
