@@ -20,7 +20,6 @@ export default function TabLayout() {
           ios: {
             position: "absolute",
           },
-          default: {},
         }),
       }}
     >
@@ -34,7 +33,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="track"
+        name="index"
         options={{
           title: "Track",
           tabBarIcon: ({ color }) => (
