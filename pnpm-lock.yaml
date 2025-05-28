@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@babel/core':
+        specifier: ^7.25.2
+        version: 7.27.3
       '@expo/vector-icons':
         specifier: ^14.1.0
         version: 14.1.0(expo-font@13.3.1(expo@53.0.9(@babel/core@7.27.3)(@expo/metro-runtime@5.0.4(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0)))(react-native-webview@13.13.5(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react@19.0.0))(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
@@ -26,6 +29,9 @@ importers:
       babel-plugin-inline-import:
         specifier: ^3.0.0
         version: 3.0.0
+      babel-preset-expo:
+        specifier: ~13.0.0
+        version: 13.0.0(@babel/core@7.27.3)
       drizzle-orm:
         specifier: ^0.43.1
         version: 0.43.1(expo-sqlite@15.2.10(expo@53.0.9(@babel/core@7.27.3)(@expo/metro-runtime@5.0.4(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0)))(react-native-webview@13.13.5(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.2(@babel/core@7.27.3)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(gel@2.1.0)
@@ -117,18 +123,12 @@ importers:
         specifier: ^3.25.30
         version: 3.25.32
     devDependencies:
-      '@babel/core':
-        specifier: ^7.25.2
-        version: 7.27.3
       '@biomejs/biome':
         specifier: ^1.9.4
         version: 1.9.4
       '@types/react':
         specifier: ~19.0.10
         version: 19.0.14
-      babel-preset-expo:
-        specifier: ~13.0.0
-        version: 13.0.0(@babel/core@7.27.3)
       drizzle-kit:
         specifier: ^0.31.1
         version: 0.31.1
