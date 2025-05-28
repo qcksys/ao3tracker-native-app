@@ -14,12 +14,14 @@
     "biome:ci": "biome ci"
   },
   "dependencies": {
+    "@babel/core": "^7.25.2",
     "@expo/vector-icons": "^14.1.0",
     "@qcksys/drizzle-extensions": "^0.0.11",
     "@react-navigation/bottom-tabs": "^7.3.13",
     "@react-navigation/elements": "^2.4.2",
     "@react-navigation/native": "^7.1.9",
     "babel-plugin-inline-import": "^3.0.0",
+    "babel-preset-expo": "~13.0.0",
     "drizzle-orm": "^0.43.1",
     "drizzle-zod": "^0.8.2",
     "expo": "~53.0.9",
@@ -52,10 +54,8 @@
     "zod": "^3.25.30"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
     "@biomejs/biome": "^1.9.4",
     "@types/react": "~19.0.10",
-    "babel-preset-expo": "~13.0.0",
     "drizzle-kit": "^0.31.1",
     "typescript": "~5.8.3"
   },
