@@ -21,12 +21,14 @@
         "expo-dev-client": "~5.1.8",
         "expo-device": "^7.1.4",
         "expo-drizzle-studio-plugin": "^0.1.2",
+        "expo-file-system": "~18.1.10",
         "expo-font": "~13.3.1",
         "expo-haptics": "~14.1.4",
         "expo-image": "~2.1.7",
         "expo-linking": "~7.1.5",
         "expo-notifications": "^0.31.2",
         "expo-router": "~5.0.7",
+        "expo-sharing": "~13.1.5",
         "expo-splash-screen": "~0.30.8",
         "expo-sqlite": "^15.2.10",
         "expo-sqlite-devtools": "^0.0.2",
@@ -775,6 +777,8 @@
     "expo-notifications": ["expo-notifications@0.31.2", "", { "dependencies": { "@expo/image-utils": "^0.7.4", "@ide/backoff": "^1.0.0", "abort-controller": "^3.0.0", "assert": "^2.0.0", "badgin": "^1.1.5", "expo-application": "~6.1.4", "expo-constants": "~17.1.6" }, "peerDependencies": { "expo": "*", "react": "*", "react-native": "*" } }, "sha512-p73VIECCULm9XkHE6WNweZDw9G62Tz9OpOOQ2tCF/QLpDW8W1q4PEUZUdbrTJREB4Q0VHegVNDJmKUkSOp7bfA=="],
 
     "expo-router": ["expo-router@5.0.7", "", { "dependencies": { "@expo/metro-runtime": "5.0.4", "@expo/server": "^0.6.2", "@radix-ui/react-slot": "1.2.0", "@react-navigation/bottom-tabs": "^7.3.10", "@react-navigation/native": "^7.1.6", "@react-navigation/native-stack": "^7.3.10", "client-only": "^0.0.1", "invariant": "^2.2.4", "react-fast-compare": "^3.2.2", "react-native-is-edge-to-edge": "^1.1.6", "schema-utils": "^4.0.1", "semver": "~7.6.3", "server-only": "^0.0.1", "shallowequal": "^1.1.0" }, "peerDependencies": { "@react-navigation/drawer": "^7.3.9", "expo": "*", "expo-constants": "*", "expo-linking": "*", "react-native-reanimated": "*", "react-native-safe-area-context": "*", "react-native-screens": "*" }, "optionalPeers": ["@react-navigation/drawer", "react-native-reanimated"] }, "sha512-NlEgRXCKtseDuIHBp87UfkvqsuVrc0MYG+zg33dopaN6wik4RkrWWxUYdNPHub0s/7qMye6zZBY4ZCrXwd/xpA=="],
+
+    "expo-sharing": ["expo-sharing@13.1.5", "", { "peerDependencies": { "expo": "*" } }, "sha512-X/5sAEiWXL2kdoGE3NO5KmbfcmaCWuWVZXHu8OQef7Yig4ZgHFkGD11HKJ5KqDrDg+SRZe4ISd6MxE7vGUgm4w=="],
 
     "expo-splash-screen": ["expo-splash-screen@0.30.8", "", { "dependencies": { "@expo/prebuild-config": "^9.0.5" }, "peerDependencies": { "expo": "*" } }, "sha512-2eh+uA543brfeG5HILXmtNKA7E2/pfywKzNumzy3Ef6OtDjYy6zJUGNSbhnZRbVEjUZo3/QNRs0JRBfY80okZg=="],
 
