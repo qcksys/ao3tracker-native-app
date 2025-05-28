@@ -3,16 +3,62 @@ import { ThemedView } from "@/components/ThemedView";
 import { worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tWorks } from "@/db/schema";
 import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
-import {} from "drizzle-orm";
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+
+type Work = Awaited<typeof worksWithHighestChapter>[number];
 
 export default function TabTrackerScreen() {
   const { data } = useLiveTablesQuery(worksWithHighestChapter, [
     tWorks,
     tChapters,
   ]);
+
+  const columnHelper = createColumnHelper<Work>();
+
+  const columns = [
+    columnHelper.accessor("title", {
+      cell: (info) => (
+        <ThemedText style={styles.tableCell}>{info.getValue()}</ThemedText>
+      ),
+      header: "Title",
+    }),
+    columnHelper.accessor((row) => row, {
+      id: "progress",
+      cell: (info) => {
+        const work = info.getValue();
+        return (
+          <ThemedText style={styles.tableCell}>
+            {work.highestChapterNumber}(
+            {work.highestChapterProgress?.toString() || "0"}%)/
+            {work.totalChapters}
+          </ThemedText>
+        );
+      },
+      header: "Progress",
+    }),
+    columnHelper.accessor("lastUpdated", {
+      cell: (info) => (
+        <ThemedText style={styles.tableCell}>
+          {info.getValue() ? info.getValue().toLocaleDateString() : "N/A"}
+        </ThemedText>
+      ),
+      header: "Updated",
+    }),
+  ];
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <ThemedView style={styles.container}>
@@ -24,26 +70,40 @@ export default function TabTrackerScreen() {
         <ThemedText style={styles.noDataText}>No works tracked yet.</ThemedText>
       ) : (
         <ScrollView style={styles.tableContainer}>
-          {data.map((work) => (
-            <Pressable
-              key={work.id}
-              style={styles.tableRow}
-              onPress={() => onWorkPress(work)}
-            >
-              <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
-              <ThemedText style={[styles.tableCell]}>
-                {work.highestChapterNumber}(
-                {work.highestChapterProgress?.toString() || "0"}%)/
-                {work.totalChapters}
-              </ThemedText>
-              <ThemedText style={[styles.tableCell]}>
-                Work Updated:{" "}
-                {work.lastUpdated
-                  ? work.lastUpdated.toLocaleDateString()
-                  : "N/A"}
-              </ThemedText>
-            </Pressable>
-          ))}
+          <View style={styles.tableHeader}>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <View key={headerGroup.id} style={styles.tableRow}>
+                {headerGroup.headers.map((header) => (
+                  <View key={header.id} style={styles.headerCellContainer}>
+                    <ThemedText style={[styles.tableCell, styles.headerCell]}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </ThemedText>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+
+          <View>
+            {table.getRowModel().rows.map((row) => (
+              <Pressable
+                key={row.id}
+                style={styles.tableRow}
+                onPress={() => onWorkPress(row.original)}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <View key={cell.id} style={styles.cellContainer}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </View>
+                ))}
+              </Pressable>
+            ))}
+          </View>
         </ScrollView>
       )}
     </ThemedView>
@@ -54,10 +114,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: Constants.statusBarHeight,
-  },
-  centerContent: {
-    justifyContent: "center",
-    alignItems: "center",
   },
   title: {
     marginBottom: 10,
@@ -70,6 +126,11 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     overflow: "hidden",
   },
+  tableHeader: {
+    backgroundColor: "#f5f5f5",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
@@ -79,12 +140,17 @@ const styles = StyleSheet.create({
   },
   headerCell: {
     fontWeight: "bold",
-    paddingVertical: 12,
+  },
+  headerCellContainer: {
+    flex: 1,
+    paddingHorizontal: 5,
+  },
+  cellContainer: {
+    flex: 1,
+    paddingHorizontal: 5,
   },
   tableCell: {
-    flex: 1,
     textAlign: "center",
-    paddingHorizontal: 5,
   },
   noDataText: {
     textAlign: "center",
@@ -99,7 +165,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const onWorkPress = (work: Awaited<typeof worksWithHighestChapter>[number]) => {
+const onWorkPress = (work: Work) => {
   const workUrl = new URL(
     `https://archiveofourown.org/works/${work.id}${
       work.highestChapterId ? `/chapters/${work.highestChapterId}` : ""

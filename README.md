@@ -7,7 +7,7 @@
 1. Install dependencies
 
    ```bash
-   pnpm install
+   bun install
    ```
 
 2. Start the app
