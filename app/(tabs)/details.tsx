@@ -11,51 +11,33 @@ import { useLocalSearchParams } from "expo-router";
 import { Alert, Pressable, StyleSheet, useColorScheme } from "react-native";
 
 export default function TabTrackerScreen() {
-  const { work } = useLocalSearchParams<{
-    work?: string;
+  const localSearchParams = useLocalSearchParams<{
+    workId?: string;
   }>();
+
+  const id = Number(localSearchParams.workId);
+
+  if (Number.isNaN(id)) {
+    return null;
+  }
 
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
   const worksQuery = useLiveQuery(
-    db.select().from(tWorks).where(eq(tWorks.id, 1)),
+    db.select().from(tWorks).where(eq(tWorks.id, id)),
   );
   const chaptersQuery = useLiveQuery(
-    db.select().from(tChapters).where(eq(tChapters.workId, 1)),
+    db.select().from(tChapters).where(eq(tChapters.workId, id)),
   );
 
-  console.log(work);
-
-  const deleteWork = async (workId: number) => {
-    try {
-      await db.delete(tChapters).where(eq(tChapters.workId, workId));
-      await db.delete(tWorks).where(eq(tWorks.id, workId));
-    } catch (error) {
-      console.error("Failed to delete work:", error);
-      Alert.alert("Error", `Failed to delete the work. ${error}`);
-    }
-  };
-
-  const confirmDelete = (work: { id: number; title?: string | null }) => {
-    Alert.alert(
-      "Delete Work",
-      `Are you sure you want to delete "${work.title ?? "undefined title"}" from your tracking history?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => deleteWork(work.id),
-        },
-      ],
-    );
-  };
+  const work = worksQuery.data?.[0];
+  const chapters = chaptersQuery.data;
 
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>
-        Tracked Works
+        Tracked Work {id}
       </ThemedText>
       <Pressable
         style={[styles.actionsCell]}
@@ -131,3 +113,28 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 });
+
+const deleteWork = async (workId: number) => {
+  try {
+    await db.delete(tChapters).where(eq(tChapters.workId, workId));
+    await db.delete(tWorks).where(eq(tWorks.id, workId));
+  } catch (error) {
+    console.error("Failed to delete work:", error);
+    Alert.alert("Error", `Failed to delete the work. ${error}`);
+  }
+};
+
+const confirmDelete = (work: { id: number; title?: string | null }) => {
+  Alert.alert(
+    "Delete Work",
+    `Are you sure you want to delete "${work.title ?? "undefined title"}" from your tracking history?`,
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteWork(work.id),
+      },
+    ],
+  );
+};

@@ -81,7 +81,10 @@ export default function TabTrackerScreen() {
                     onPress={(e) => {
                       e.stopPropagation();
                       router.navigate({
-                        pathname: "/(tabs)/work",
+                        pathname: "/(tabs)/details",
+                        params: {
+                          workId: work.id,
+                        },
                       });
                     }}
                   >
