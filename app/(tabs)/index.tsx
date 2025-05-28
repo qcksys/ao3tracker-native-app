@@ -1,47 +1,18 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { db } from "@/db/drizzle";
+import { worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tWorks } from "@/db/schema";
 import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
-import { and, eq, max } from "drizzle-orm";
+import {} from "drizzle-orm";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
 
 export default function TabTrackerScreen() {
-  const maxChapterNumberSubquery = db
-    .select({
-      workId: tChapters.workId,
-      maxChapterNum: max(tChapters.chapterNumber).as("max_chapter_num"),
-    })
-    .from(tChapters)
-    .groupBy(tChapters.workId)
-    .as("mcn");
-  const { data } = useLiveTablesQuery(
-    db
-      .select({
-        id: tWorks.id,
-        title: tWorks.title,
-        totalChapters: tWorks.chapters,
-        highestChapterNumber: tChapters.chapterNumber,
-        highestChapterId: tChapters.id,
-        highestChapterProgress: tChapters.lastChapterProgress,
-        lastUpdated: tWorks.lastUpdated,
-      })
-      .from(tWorks)
-      .leftJoin(
-        maxChapterNumberSubquery,
-        eq(tWorks.id, maxChapterNumberSubquery.workId),
-      )
-      .leftJoin(
-        tChapters,
-        and(
-          eq(tChapters.workId, tWorks.id),
-          eq(tChapters.chapterNumber, maxChapterNumberSubquery.maxChapterNum),
-        ),
-      ),
-    [tWorks, tChapters],
-  );
+  const { data } = useLiveTablesQuery(worksWithHighestChapter, [
+    tWorks,
+    tChapters,
+  ]);
 
   return (
     <ThemedView style={styles.container}>
@@ -53,53 +24,11 @@ export default function TabTrackerScreen() {
         <ThemedText style={styles.noDataText}>No works tracked yet.</ThemedText>
       ) : (
         <ScrollView style={styles.tableContainer}>
-          <View style={styles.tableRow}>
-            <ThemedText
-              type="subtitle"
-              style={[styles.tableCell, styles.headerCell]}
-            >
-              Title
-            </ThemedText>
-            <ThemedText
-              type="subtitle"
-              style={[styles.tableCell, styles.headerCell]}
-            >
-              Chapter Progress
-            </ThemedText>
-            <ThemedText
-              type="subtitle"
-              style={[styles.tableCell, styles.headerCell]}
-            >
-              Work Last Updated
-            </ThemedText>
-          </View>
-
           {data.map((work) => (
             <Pressable
               key={work.id}
               style={styles.tableRow}
-              onPress={() => {
-                const workUrl = new URL(
-                  `https://archiveofourown.org/works/${work.id}${
-                    work.highestChapterId
-                      ? `/chapters/${work.highestChapterId}`
-                      : ""
-                  }#workskin`,
-                );
-                if (work.highestChapterProgress) {
-                  workUrl.searchParams.set(
-                    "scrollTo",
-                    work.highestChapterProgress.toString(),
-                  );
-                }
-
-                router.navigate({
-                  pathname: "/(tabs)/read",
-                  params: {
-                    uri: workUrl.toString(),
-                  },
-                });
-              }}
+              onPress={() => onWorkPress(work)}
             >
               <ThemedText style={[styles.tableCell]}>{work.title}</ThemedText>
               <ThemedText style={[styles.tableCell]}>
@@ -108,6 +37,7 @@ export default function TabTrackerScreen() {
                 {work.totalChapters}
               </ThemedText>
               <ThemedText style={[styles.tableCell]}>
+                Work Updated:{" "}
                 {work.lastUpdated
                   ? work.lastUpdated.toLocaleDateString()
                   : "N/A"}
@@ -124,21 +54,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: Constants.statusBarHeight,
-    padding: 16,
   },
   centerContent: {
     justifyContent: "center",
     alignItems: "center",
   },
   title: {
-    marginBottom: 20,
+    marginBottom: 10,
+    marginTop: 10,
     textAlign: "center",
   },
   tableContainer: {
     flex: 1,
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 8,
     overflow: "hidden",
   },
   tableRow: {
@@ -169,3 +98,24 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+const onWorkPress = (work: Awaited<typeof worksWithHighestChapter>[number]) => {
+  const workUrl = new URL(
+    `https://archiveofourown.org/works/${work.id}${
+      work.highestChapterId ? `/chapters/${work.highestChapterId}` : ""
+    }#workskin`,
+  );
+  if (work.highestChapterProgress) {
+    workUrl.searchParams.set(
+      "scrollTo",
+      work.highestChapterProgress.toString(),
+    );
+  }
+
+  router.navigate({
+    pathname: "/(tabs)/read",
+    params: {
+      uri: workUrl.toString(),
+    },
+  });
+};
