@@ -11,7 +11,7 @@ import type React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useRef } from "react";
-import { BackHandler } from "react-native";
+import { ActivityIndicator, BackHandler, StyleSheet, View } from "react-native";
 import {
   WebView,
   type WebViewMessageEvent,
@@ -21,9 +21,25 @@ import {
 
 const TrackedWebView: React.FC<WebViewProps> = (props) => {
   const webviewRef = useRef<WebView>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currentUrl, setCurrentUrl] = useState<string>(
+    props.source && "uri" in props.source ? props.source.uri : "",
+  );
   const [lastNavState, setLastNavState] = useState<URL>(
     new URL(props.source && "uri" in props.source ? props.source.uri : ""),
   );
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentUrl would make it load forever
+  useEffect(() => {
+    const newUrl =
+      props.source && "uri" in props.source ? props.source.uri : "";
+    if (new URL(newUrl).pathname !== new URL(currentUrl).pathname) {
+      setIsLoading(true);
+      setCurrentUrl(newUrl);
+    }
+    console.log("effect");
+  }, [props.source]);
+
   const handleWebViewNavigationStateChange = async (
     newNavState: WebViewNavigation,
   ) => {
@@ -129,15 +145,41 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
   };
 
   return (
-    <WebView
-      {...props}
-      ref={webviewRef}
-      injectedJavaScript={injectedJs}
-      onNavigationStateChange={handleWebViewNavigationStateChange}
-      onMessage={onMessage}
-    />
+    <View style={styles.container}>
+      <WebView
+        {...props}
+        ref={webviewRef}
+        injectedJavaScript={injectedJs}
+        onNavigationStateChange={handleWebViewNavigationStateChange}
+        onMessage={onMessage}
+        onLoadEnd={() => setIsLoading(false)}
+        onError={() => setIsLoading(false)}
+      />
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: "relative",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
 
 const injectedJs = `
 // injectedWebviewScripts/shared/getPagePosition.ts
