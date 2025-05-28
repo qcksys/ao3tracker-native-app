@@ -86,7 +86,7 @@ export default function TabTrackerScreen() {
               <ThemedText
                 style={[styles.tableCell, styles.headerCell, styles.statusCell]}
               >
-                Status/Date
+                Info
               </ThemedText>
               <ThemedText
                 style={[
@@ -107,7 +107,7 @@ export default function TabTrackerScreen() {
             {data.map((work) => (
               <Pressable
                 key={work.id}
-                style={[styles.tableRow, { borderBottomColor: colors.overlay }]}
+                style={[styles.tableRow, { borderBottomColor: colors.border }]}
                 onPress={() => onWorkPress(work)}
               >
                 <ThemedText style={[styles.tableCell, styles.titleCell]}>

@@ -84,7 +84,7 @@ export default function TabSettingsScreen() {
           style={[styles.settingButton, { backgroundColor: colors.primary }]}
           onPress={exportDbAsJson}
         >
-          <ThemedText style={[styles.buttonText, { color: colors.buttonText }]}>
+          <ThemedText style={[styles.buttonText, { color: colors.foreground }]}>
             Export Database as JSON
           </ThemedText>
         </Pressable>
@@ -96,7 +96,7 @@ export default function TabSettingsScreen() {
                 styles.jsonContainer,
                 {
                   borderColor: colors.border,
-                  backgroundColor: colors.codeBackground,
+                  backgroundColor: colors.muted,
                 },
               ]}
             >
@@ -111,7 +111,7 @@ export default function TabSettingsScreen() {
               onPress={clearDisplayedJson}
             >
               <ThemedText
-                style={[styles.buttonText, { color: colors.buttonText }]}
+                style={[styles.buttonText, { color: colors.background }]}
               >
                 Clear JSON Display
               </ThemedText>
