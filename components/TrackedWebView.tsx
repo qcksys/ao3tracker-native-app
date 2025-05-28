@@ -37,7 +37,6 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
       setIsLoading(true);
       setCurrentUrl(newUrl);
     }
-    console.log("effect");
   }, [props.source]);
 
   const handleWebViewNavigationStateChange = async (
