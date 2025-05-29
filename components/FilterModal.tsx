@@ -205,7 +205,7 @@ export function FilterModal({
               onPress={() => openDropdown("category")}
               onClearAll={() => clearTagsForType("category")}
               isMultiSelect={true}
-              onRemoveTag={(tag) => toggleTagSelection(tag, "rating")}
+              onRemoveTag={(tag) => toggleTagSelection(tag, "category")}
             />
             <TagFilter
               type="fandom"
