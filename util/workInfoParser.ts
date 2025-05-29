@@ -13,7 +13,7 @@ export type TWorkUrlInfo = z.infer<typeof workUrlInfoSchema>;
 export const parseNavStateUrl = (url: URL): TWorkUrlInfo => {
   const pathParts = url.pathname.split("/").filter(Boolean);
   let workId: number | null = null;
-  let chapterId: number | null;
+  let chapterId: number;
   let scroll: number | null = null;
 
   if (pathParts[0] === "works" && !Number.isNaN(Number(pathParts[1]))) {
@@ -22,7 +22,7 @@ export const parseNavStateUrl = (url: URL): TWorkUrlInfo => {
   if (pathParts[2] === "chapters" && !Number.isNaN(Number(pathParts[3]))) {
     chapterId = Number(pathParts[3]);
   } else {
-    chapterId = null;
+    chapterId = 0;
   }
   if (workId && url.searchParams.get("scroll")) {
     scroll = Number(url.searchParams.get("scroll"));

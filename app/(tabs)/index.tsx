@@ -38,14 +38,14 @@ export default function TabTrackerScreen() {
         </ThemedText>
       ) : (
         <View style={[styles.tableContainer, { borderColor: colors.icon }]}>
-          <View style={styles.tableRow}>
+          <View style={styles.tableHeader}>
             <ThemedText
-              style={[styles.tableCell, styles.headerCell, styles.titleCell]}
+              style={[styles.tableCell, styles.headerCell, styles.cell50]}
             >
               Title
             </ThemedText>
             <ThemedText
-              style={[styles.tableCell, styles.headerCell, styles.statusCell]}
+              style={[styles.tableCell, styles.headerCell, styles.cell50]}
             >
               Info
             </ThemedText>
@@ -61,45 +61,62 @@ export default function TabTrackerScreen() {
                   ]}
                   onPress={() => onWorkPress(work)}
                 >
-                  <ThemedText style={[styles.tableCell, styles.titleCell]}>
-                    {work.title}
-                  </ThemedText>
-                  <View style={styles.statusCell}>
-                    <ThemedText style={[styles.tableCell, styles.statusText]}>
-                      Chapter: {work.highestChapterNumber}/{work.totalChapters}{" "}
-                      ({work.highestChapterProgress?.toString() || "0"}%)
-                    </ThemedText>
-                    <ThemedText style={[styles.tableCell, styles.statusText]}>
-                      Updated:{" "}
-                      {work.lastUpdated
-                        ? work.lastUpdated?.toLocaleDateString()
-                        : "N/A"}
-                    </ThemedText>
-                    <ThemedText style={[styles.tableCell, styles.statusText]}>
-                      Read:{" "}
-                      {work.lastRead
-                        ? work.lastRead?.toLocaleString()
-                        : "Never"}
-                    </ThemedText>
+                  <View style={styles.workRow}>
+                    <View>
+                      <View style={styles.row}>
+                        <ThemedText style={styles.cell90}>
+                          {work.title}
+                        </ThemedText>
+                        <Pressable
+                          style={styles.cell10}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            router.navigate({
+                              pathname: "/(tabs)/details",
+                              params: {
+                                workId: work.id,
+                              },
+                            });
+                          }}
+                        >
+                          <IconSymbol
+                            size={40}
+                            name="list.bullet"
+                            color={colors.primary}
+                          />
+                        </Pressable>
+                      </View>
+                      <ThemedText style={styles.statusText}>
+                        Long Sample Fandom Text (Type) TODO
+                      </ThemedText>
+                    </View>
                   </View>
-                  <Pressable
-                    style={[styles.actionsCell]}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      router.navigate({
-                        pathname: "/(tabs)/details",
-                        params: {
-                          workId: work.id,
-                        },
-                      });
-                    }}
-                  >
-                    <IconSymbol
-                      size={40}
-                      name="list.bullet"
-                      color={colors.primary}
-                    />
-                  </Pressable>
+                  <View style={styles.workRow}>
+                    <View style={styles.cell50}>
+                      <ThemedText style={[styles.tableCell, styles.statusText]}>
+                        By: Author TODO
+                      </ThemedText>
+                      <ThemedText style={[styles.tableCell, styles.statusText]}>
+                        Chapter: {work.highestChapterNumber}/
+                        {work.totalChapters} (
+                        {work.highestChapterProgress?.toString() || "0"}%)
+                      </ThemedText>
+                    </View>
+                    <View style={styles.cell50}>
+                      <ThemedText style={[styles.tableCell, styles.statusText]}>
+                        Updated:{" "}
+                        {work.lastUpdated
+                          ? work.lastUpdated?.toLocaleDateString()
+                          : "N/A"}
+                      </ThemedText>
+                      <ThemedText style={[styles.tableCell, styles.statusText]}>
+                        Read:{" "}
+                        {work.lastRead
+                          ? work.lastRead?.toLocaleString()
+                          : "Never"}
+                      </ThemedText>
+                    </View>
+                  </View>
                 </Pressable>
               ))}
             </View>
@@ -126,27 +143,44 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   tableRow: {
+    flexDirection: "column",
+    borderBottomWidth: 1,
+    paddingVertical: 10,
+    backgroundColor: "transparent",
+    width: "100%",
+  },
+  tableHeader: {
     flexDirection: "row",
     borderBottomWidth: 1,
     paddingVertical: 10,
     backgroundColor: "transparent",
     width: "100%",
   },
+  workRow: {
+    flexDirection: "row",
+    width: "100%",
+  },
+  row: {
+    flexDirection: "row",
+  },
+  rowEnd: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
   headerCell: {
     fontWeight: "bold",
   },
-  titleCell: {
-    width: "40%",
+  cell: {
     paddingHorizontal: 5,
   },
-  statusCell: {
-    width: "50%",
-    justifyContent: "center",
-  },
-  actionsCell: {
+  cell10: {
     width: "10%",
-    alignItems: "center",
-    paddingHorizontal: 5,
+  },
+  cell50: {
+    width: "50%",
+  },
+  cell90: {
+    width: "90%",
   },
   tableCell: {
     textAlign: "left",

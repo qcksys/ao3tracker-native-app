@@ -58,7 +58,7 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
       setLastNavState(new URL(url));
 
       const pageInfo = parseNavStateUrl(lastNavState);
-      if (pageInfo.workId && pageInfo.chapterId) {
+      if (pageInfo.workId && (pageInfo.chapterId || pageInfo.chapterId === 0)) {
         const progressUpdate = await db
           .update(tChapters)
           .set({ lastChapterProgress: pageInfo.scroll })
