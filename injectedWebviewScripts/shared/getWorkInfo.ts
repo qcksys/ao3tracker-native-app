@@ -1,5 +1,7 @@
+import type { TWorkInfoEvent } from "../../util/workInfoParser";
+
 export const getWorkInfo = () => {
-  return JSON.stringify({
+  const workInfo: Partial<TWorkInfoEvent> = {
     type: "workInfo",
     url: window.location.href,
     workName: document
@@ -16,8 +18,11 @@ export const getWorkInfo = () => {
     totalChapters: document
       .querySelector(".work.meta.group .stats dd.chapters")
       ?.textContent?.trim(),
-    authorUrl: document
-      .querySelector("#workskin .byline.heading a")
-      ?.getAttribute("href"),
-  });
+    authorUrl:
+      document
+        .querySelector("#workskin .byline.heading a")
+        ?.getAttribute("href") ?? undefined,
+  };
+
+  return JSON.stringify(workInfo);
 };

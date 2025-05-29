@@ -38,6 +38,7 @@ export const parseNavStateUrl = (url: URL): TWorkUrlInfo => {
 };
 
 export const workInfoEvent = z.object({
+  type: z.literal("workInfo"),
   url: z.url(),
   authorUrl: z.string(),
   chapterName: z.string().optional(),
@@ -61,6 +62,31 @@ export const workInfoSchema = z.object({
 });
 
 export type TWorkInfo = z.infer<typeof workInfoSchema>;
+
+export const workTagEvent = z.object({
+  tag: z.string().nullish(),
+  href: z.string().nullish(),
+});
+
+export const workTagsInfoEvent = z.object({
+  type: z.literal("workTags"),
+  url: z.url(),
+  workLastUpdated: z.string().optional(),
+  rating: workTagEvent,
+  warnings: z.array(workTagEvent),
+  category: z.array(workTagEvent),
+  fandom: z.array(workTagEvent),
+  relationship: z.array(workTagEvent),
+  character: z.array(workTagEvent),
+  freeform: z.array(workTagEvent),
+});
+
+export type TWorkTagInfoEvent = z.infer<typeof workTagsInfoEvent>;
+
+export const workTag = z.object({
+  tag: z.string(),
+  href: z.string(),
+});
 
 export const parseWorkInfoEvent = (workInfo: TWorkInfoEvent): TWorkInfo => {
   const totalChapters = workInfo.totalChapters.match(/^\d+/);

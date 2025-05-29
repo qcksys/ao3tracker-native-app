@@ -1,5 +1,6 @@
 import { updateScrollPercentageToQueryParam } from "./shared/getPagePosition";
 import { getWorkInfo } from "./shared/getWorkInfo";
+import { getWorkTagInfo } from "./shared/getWorkTagInfo";
 import { scrollTo } from "./shared/scrollTo";
 
 declare global {
@@ -18,6 +19,7 @@ const scrollToParam = url.searchParams.get("scrollTo");
 if (urlParts[0] === "works") {
   window.addEventListener("scroll", updateScrollPercentageToQueryParam);
   window.ReactNativeWebView.postMessage(getWorkInfo());
+  window.ReactNativeWebView.postMessage(getWorkTagInfo());
 }
 
 // Run if scrollToParam is present

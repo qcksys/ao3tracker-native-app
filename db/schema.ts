@@ -61,7 +61,7 @@ export type TTagTypeId = TTagType[keyof TTagType];
 
 export const tTags = sqliteTable("tags", {
   id: integer({ mode: "number" }).notNull().primaryKey({ autoIncrement: true }),
-  tag: text().notNull(),
+  tag: text().notNull().unique(),
   href: text().notNull(),
   typeId: integer({ mode: "number" }).$type<TTagTypeId>().notNull(),
   rowCreatedAt: integer({ mode: "timestamp" })

@@ -61,34 +61,32 @@ export default function TabTrackerScreen() {
                   ]}
                   onPress={() => onWorkPress(work)}
                 >
-                  <View style={styles.workRow}>
-                    <View>
-                      <View style={styles.row}>
-                        <ThemedText style={styles.cell90}>
-                          {work.title}
+                  <View>
+                    <View style={styles.workRow}>
+                      <View style={styles.cell90}>
+                        <ThemedText>{work.title}</ThemedText>
+                        <ThemedText style={[styles.statusText, styles.italic]}>
+                          Long Sample Fandom Text (Type) TODO
                         </ThemedText>
-                        <Pressable
-                          style={styles.cell10}
-                          onPress={(e) => {
-                            e.stopPropagation();
-                            router.navigate({
-                              pathname: "/(tabs)/details",
-                              params: {
-                                workId: work.id,
-                              },
-                            });
-                          }}
-                        >
-                          <IconSymbol
-                            size={40}
-                            name="list.bullet"
-                            color={colors.primary}
-                          />
-                        </Pressable>
                       </View>
-                      <ThemedText style={styles.statusText}>
-                        Long Sample Fandom Text (Type) TODO
-                      </ThemedText>
+                      <Pressable
+                        style={styles.cell10}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          router.navigate({
+                            pathname: "/(tabs)/details",
+                            params: {
+                              workId: work.id,
+                            },
+                          });
+                        }}
+                      >
+                        <IconSymbol
+                          size={40}
+                          name="list.bullet"
+                          color={colors.primary}
+                        />
+                      </Pressable>
                     </View>
                   </View>
                   <View style={styles.workRow}>
@@ -182,12 +180,15 @@ const styles = StyleSheet.create({
   cell90: {
     width: "90%",
   },
+  italic: {
+    fontStyle: "italic",
+  },
   tableCell: {
     textAlign: "left",
   },
   statusText: {
     fontSize: 14,
-    lineHeight: 14,
+    lineHeight: 16,
   },
   noDataText: {
     textAlign: "center",
