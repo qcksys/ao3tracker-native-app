@@ -24,6 +24,7 @@ const MAPPING = {
   "trash.fill": "delete",
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
+  "line.3.horizontal.decrease.circle": "filter-list", // Added filter icon
 } as IconMapping;
 
 /**

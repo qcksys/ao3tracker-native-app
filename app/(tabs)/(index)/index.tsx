@@ -1,13 +1,15 @@
+import { FilterModal } from "@/components/FilterModal";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { ao3Url, ao3WorksUrl } from "@/constants/AO3";
 import { Colors } from "@/constants/Colors";
-import { worksWithHighestChapter } from "@/db/queries/track";
+import { type WorkFilter, worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tTags, tWorks } from "@/db/schema";
 import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
 import Constants from "expo-constants";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -16,17 +18,31 @@ import {
   useColorScheme,
 } from "react-native";
 
-type Work = Awaited<typeof worksWithHighestChapter>[number];
+type Work = Awaited<ReturnType<typeof worksWithHighestChapter>>[number];
 
 export default function TabTrackStackScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
-  const { data } = useLiveTablesQuery(worksWithHighestChapter, [
-    tWorks,
-    tChapters,
-    tTags,
-  ]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filter, setFilter] = useState<WorkFilter>({});
+
+  console.log(filter);
+
+  const { data } = useLiveTablesQuery(
+    worksWithHighestChapter(filter),
+    [tWorks, tChapters, tTags],
+    [filter],
+  );
+
+  const handleApplyFilter = (newFilter: WorkFilter) => {
+    setFilter(newFilter);
+  };
+
+  const hasActiveFilters =
+    filter.completedOnly === true ||
+    filter.inProgressOnly === true ||
+    (filter.searchQuery && filter.searchQuery.trim() !== "");
 
   return (
     <ThemedView style={styles.container}>
@@ -34,6 +50,26 @@ export default function TabTrackStackScreen() {
         <ThemedText type="title" style={styles.title}>
           Tracked Works
         </ThemedText>
+        <Pressable
+          style={({ pressed }) => [
+            styles.iconButton,
+            {
+              backgroundColor: pressed
+                ? colors.foreground
+                : hasActiveFilters
+                  ? colors.primary
+                  : "transparent",
+            },
+          ]}
+          onPress={() => setFilterModalVisible(true)}
+        >
+          <IconSymbol
+            size={24}
+            name="line.3.horizontal.decrease.circle"
+            color={hasActiveFilters ? colors.background : colors.primary}
+          />
+        </Pressable>
+
         <Pressable
           style={({ pressed }) => [
             styles.ao3Button,
@@ -51,7 +87,9 @@ export default function TabTrackStackScreen() {
 
       {data.length === 0 ? (
         <ThemedText style={[styles.noDataText, { color: colors.icon }]}>
-          No works tracked yet.
+          {hasActiveFilters
+            ? "No works match your filters."
+            : "No works tracked yet."}
         </ThemedText>
       ) : (
         <View style={[styles.tableContainer, { borderColor: colors.icon }]}>
@@ -140,6 +178,13 @@ export default function TabTrackStackScreen() {
           </ScrollView>
         </View>
       )}
+
+      <FilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        filter={filter}
+        onApplyFilter={handleApplyFilter}
+      />
     </ThemedView>
   );
 }
@@ -155,6 +200,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 15,
     marginVertical: 10,
+  },
+  iconButton: {
+    padding: 8,
+    borderRadius: 8,
+    marginRight: 10,
   },
   ao3Button: {
     paddingVertical: 8,
