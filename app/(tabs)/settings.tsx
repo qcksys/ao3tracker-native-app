@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { db } from "@/db/drizzle";
-import { tChapters, tWorks } from "@/db/schema";
+import { tChapters, tTags, tWorks } from "@/db/schema";
 import Constants from "expo-constants";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
@@ -27,11 +27,13 @@ export default function TabSettingsScreen() {
     try {
       const works = await db.select().from(tWorks);
       const chapters = await db.select().from(tChapters);
+      const tags = await db.select().from(tTags);
 
       const dbContent = {
+        exportDate: new Date().toISOString(),
         works,
         chapters,
-        exportDate: new Date().toISOString(),
+        tags,
       };
 
       const jsonContent = JSON.stringify(dbContent, null, 2);
