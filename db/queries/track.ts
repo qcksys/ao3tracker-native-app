@@ -15,6 +15,7 @@ export type WorkFilter = {
   completedOnly?: boolean;
   inProgressOnly?: boolean;
   searchQuery?: string;
+  fandom?: string;
 };
 
 export const worksWithHighestChapter = (filter?: WorkFilter) => {
@@ -42,10 +43,6 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
         eq(tChapters.workId, tWorks.id),
         eq(tChapters.chapterNumber, maxChapterNumberSubquery.maxChapterNum),
       ),
-    )
-    .leftJoin(
-      tTags,
-      and(eq(tTags.workId, tWorks.id), eq(tTags.typeId, tagTypes.fandom)),
     );
 
   const conditions = [];
@@ -65,12 +62,22 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
   }
 
   return query
+    .leftJoin(
+      tTags,
+      and(eq(tTags.workId, tWorks.id), eq(tTags.typeId, tagTypes.fandom)),
+    )
     .where(
       conditions.length > 0
-        ? conditions.length > 1
-          ? and(...conditions)
-          : conditions[0]
-        : undefined,
+        ? and(
+            ...[
+              ...conditions,
+              // Add fandom filter if present
+              ...(filter?.fandom ? [eq(tTags.tag, filter.fandom)] : []),
+            ],
+          )
+        : filter?.fandom
+          ? eq(tTags.tag, filter.fandom)
+          : undefined,
     )
     .groupBy(
       tWorks.id,
@@ -85,3 +92,12 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
     )
     .orderBy(desc(tWorks.lastRead));
 };
+
+export const getAllFandoms = db
+  .select({
+    tag: tTags.tag,
+  })
+  .from(tTags)
+  .where(eq(tTags.typeId, tagTypes.fandom))
+  .groupBy(tTags.tag)
+  .orderBy(tTags.tag);

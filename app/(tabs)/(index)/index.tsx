@@ -27,8 +27,6 @@ export default function TabTrackStackScreen() {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filter, setFilter] = useState<WorkFilter>({});
 
-  console.log(filter);
-
   const { data } = useLiveTablesQuery(
     worksWithHighestChapter(filter),
     [tWorks, tChapters, tTags],
@@ -42,7 +40,8 @@ export default function TabTrackStackScreen() {
   const hasActiveFilters =
     filter.completedOnly === true ||
     filter.inProgressOnly === true ||
-    (filter.searchQuery && filter.searchQuery.trim() !== "");
+    (filter.searchQuery && filter.searchQuery.trim() !== "") ||
+    !!filter.fandom;
 
   return (
     <ThemedView style={styles.container}>
