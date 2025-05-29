@@ -7,22 +7,32 @@ import {
   text,
 } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-export const tWorks = sqliteTable("works", {
-  id: integer({ mode: "number" }).notNull().primaryKey(),
-  title: text(),
-  chapters: integer({ mode: "number" }),
-  lastUpdated: integer({ mode: "timestamp" }),
-  lastRead: integer({ mode: "timestamp" }),
-  author: text(),
-  rowCreatedAt: integer({ mode: "timestamp" })
-    .$default(() => new Date())
-    .notNull(),
-  rowUpdatedAt: integer({ mode: "timestamp" })
-    .$default(() => new Date())
-    .$onUpdate(() => new Date())
-    .notNull(),
-  rowDeletedAt: integer({ mode: "timestamp" }),
-});
+export const tWorks = sqliteTable(
+  "works",
+  {
+    id: integer({ mode: "number" }).notNull().primaryKey(),
+    title: text(),
+    chapters: integer({ mode: "number" }),
+    lastUpdated: integer({ mode: "timestamp" }),
+    lastRead: integer({ mode: "timestamp" }),
+    author: text(),
+    rowCreatedAt: integer({ mode: "timestamp" })
+      .$default(() => new Date())
+      .notNull(),
+    rowUpdatedAt: integer({ mode: "timestamp" })
+      .$default(() => new Date())
+      .$onUpdate(() => new Date())
+      .notNull(),
+    rowDeletedAt: integer({ mode: "timestamp" }),
+  },
+  (table) => {
+    return [
+      index("idx_works_rowCreatedAt").on(table.rowCreatedAt),
+      index("idx_works_rowUpdatedAt").on(table.rowUpdatedAt),
+      index("idx_works_rowDeletedAt").on(table.rowDeletedAt),
+    ];
+  },
+);
 
 export const sWorksI = createInsertSchema(tWorks);
 export const sWorksS = createSelectSchema(tWorks);
@@ -57,6 +67,7 @@ export const tTags = sqliteTable(
     return [
       primaryKey({ columns: [table.workId, table.tag] }),
       index("idx_tags_typeId").on(table.typeId),
+      index("idx_tags_rowCreatedAt").on(table.rowCreatedAt),
     ];
   },
 );
@@ -85,7 +96,12 @@ export const tChapters = sqliteTable(
     rowDeletedAt: integer({ mode: "timestamp" }),
   },
   (table) => {
-    return [primaryKey({ columns: [table.id, table.workId] })];
+    return [
+      primaryKey({ columns: [table.id, table.workId] }),
+      index("idx_chapters_rowCreatedAt").on(table.rowCreatedAt),
+      index("idx_chapters_rowUpdatedAt").on(table.rowUpdatedAt),
+      index("idx_chapters_rowDeletedAt").on(table.rowDeletedAt),
+    ];
   },
 );
 

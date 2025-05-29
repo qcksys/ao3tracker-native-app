@@ -22,7 +22,7 @@ export const worksWithHighestChapter = db
     highestChapterProgress: tChapters.lastChapterProgress,
     lastUpdated: tWorks.lastUpdated,
     lastRead: tWorks.lastRead,
-    fandoms: sql<string>`GROUP_CONCAT(count(${tTags.tag}) as int)`,
+    fandoms: sql<string>`GROUP_CONCAT(${tTags.tag}, ', ')`.as("fandoms"),
   })
   .from(tWorks)
   .leftJoin(

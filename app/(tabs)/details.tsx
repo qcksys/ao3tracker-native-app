@@ -59,7 +59,7 @@ export default function TabTrackerScreen() {
         </ThemedText>
         <ThemedView style={styles.workInfoRow}>
           <ThemedText>
-            Last Updated: {work.lastUpdated?.toLocaleString() || "Unknown"}
+            Last Updated: {work.lastUpdated?.toLocaleDateString() || "Unknown"}
           </ThemedText>
           <Pressable
             style={styles.deleteWorkButton}
@@ -107,6 +107,7 @@ export default function TabTrackerScreen() {
                   {chapter.lastRead && (
                     <ThemedText style={styles.statusText}>
                       Last Read on {new Date(chapter.lastRead).toLocaleString()}
+                      . ({chapter.lastChapterProgress?.toString() || "0"}%)
                     </ThemedText>
                   )}
                 </ThemedView>

@@ -11,7 +11,7 @@ import {
   workTagsInfoEvent,
 } from "@/util/workInfoParser";
 import { onConflictDoUpdateConfig } from "@qcksys/drizzle-extensions/onConflictDoUpdate";
-import { and, eq, gt } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -216,15 +216,20 @@ const onMessageWorkTags = async (eventData: TWorkInfoEvent) => {
 
     const workId = Number(pathParts[1]);
 
-    const tagsMoreRecentThanWorkUpdate = await db.$count(
-      tTags,
-      and(
-        eq(tTags.workId, workId),
-        gt(tTags.rowCreatedAt, new Date(parsed.data.workLastUpdated ?? "")),
-      ),
-    );
+    const tagsLessRecentThanWorkUpdate = await db
+      .select({ rowCreatedAt: tTags.rowCreatedAt })
+      .from(tTags)
+      .where(eq(tTags.workId, workId))
+      .orderBy(desc(tTags.rowCreatedAt))
+      .limit(1);
 
-    if (!tagsMoreRecentThanWorkUpdate) {
+    const latestCreated: Date | undefined =
+      tagsLessRecentThanWorkUpdate[0]?.rowCreatedAt;
+
+    if (
+      latestCreated &&
+      latestCreated >= new Date(parsed.data.workLastUpdated ?? "")
+    ) {
       console.log(
         "No new tags to update for work",
         workId,
