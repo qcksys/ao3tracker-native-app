@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "300cd1a4-d54b-4eb9-a664-7ce33d9ae71c",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "9c1703d5-b014-449f-b420-b331f00862f3",
+  "prevId": "300cd1a4-d54b-4eb9-a664-7ce33d9ae71c",
   "tables": {
     "chapters": {
       "name": "chapters",
@@ -90,6 +90,13 @@
         },
         "lastUpdated": {
           "name": "lastUpdated",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastRead": {
+          "name": "lastRead",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
