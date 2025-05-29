@@ -16,6 +16,7 @@ export const worksWithHighestChapter = db
     id: tWorks.id,
     title: tWorks.title,
     totalChapters: tWorks.chapters,
+    author: tWorks.author,
     highestChapterNumber: tChapters.chapterNumber,
     highestChapterId: tChapters.id,
     highestChapterProgress: tChapters.lastChapterProgress,

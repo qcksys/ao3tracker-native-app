@@ -169,6 +169,7 @@ const onMessageWorkInfo = async (eventData: TWorkInfoEvent) => {
           .values({
             id: workInfo.workUrlData.workId,
             title: workInfo.workName,
+            author: workInfo.authorUsername,
             chapters: workInfo.totalChapters,
             lastUpdated: workInfo.workLastUpdated,
             lastRead: new Date(),

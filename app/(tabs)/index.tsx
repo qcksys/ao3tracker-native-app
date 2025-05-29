@@ -115,7 +115,7 @@ export default function TabTrackerScreen() {
                   <View style={styles.workRow}>
                     <View style={styles.cell50}>
                       <ThemedText style={[styles.tableCell, styles.statusText]}>
-                        By: Author TODO
+                        By: {work.author || "Unknown"}
                       </ThemedText>
                       <ThemedText style={[styles.tableCell, styles.statusText]}>
                         Chapter: {work.highestChapterNumber}/
