@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "300cd1a4-d54b-4eb9-a664-7ce33d9ae71c",
+  "id": "02ff799e-c343-4749-ac70-a200e5e0d433",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "chapters": {
@@ -48,9 +48,52 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "rowCreatedAt": {
+          "name": "rowCreatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rowUpdatedAt": {
+          "name": "rowUpdatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rowDeletedAt": {
+          "name": "rowDeletedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_chapters_rowCreatedAt": {
+          "name": "idx_chapters_rowCreatedAt",
+          "columns": [
+            "rowCreatedAt"
+          ],
+          "isUnique": false
+        },
+        "idx_chapters_rowUpdatedAt": {
+          "name": "idx_chapters_rowUpdatedAt",
+          "columns": [
+            "rowUpdatedAt"
+          ],
+          "isUnique": false
+        },
+        "idx_chapters_rowDeletedAt": {
+          "name": "idx_chapters_rowDeletedAt",
+          "columns": [
+            "rowDeletedAt"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "chapters_id_workId_pk": {
@@ -59,6 +102,74 @@
             "workId"
           ],
           "name": "chapters_id_workId_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tags": {
+      "name": "tags",
+      "columns": {
+        "workId": {
+          "name": "workId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tag": {
+          "name": "tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "href": {
+          "name": "href",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "typeId": {
+          "name": "typeId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rowCreatedAt": {
+          "name": "rowCreatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_tags_typeId": {
+          "name": "idx_tags_typeId",
+          "columns": [
+            "typeId"
+          ],
+          "isUnique": false
+        },
+        "idx_tags_rowCreatedAt": {
+          "name": "idx_tags_rowCreatedAt",
+          "columns": [
+            "rowCreatedAt"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "tags_workId_tag_pk": {
+          "columns": [
+            "workId",
+            "tag"
+          ],
+          "name": "tags_workId_tag_pk"
         }
       },
       "uniqueConstraints": {},
@@ -94,9 +205,66 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "lastRead": {
+          "name": "lastRead",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "author": {
+          "name": "author",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "rowCreatedAt": {
+          "name": "rowCreatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rowUpdatedAt": {
+          "name": "rowUpdatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rowDeletedAt": {
+          "name": "rowDeletedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_works_rowCreatedAt": {
+          "name": "idx_works_rowCreatedAt",
+          "columns": [
+            "rowCreatedAt"
+          ],
+          "isUnique": false
+        },
+        "idx_works_rowUpdatedAt": {
+          "name": "idx_works_rowUpdatedAt",
+          "columns": [
+            "rowUpdatedAt"
+          ],
+          "isUnique": false
+        },
+        "idx_works_rowDeletedAt": {
+          "name": "idx_works_rowDeletedAt",
+          "columns": [
+            "rowDeletedAt"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
