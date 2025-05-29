@@ -7,7 +7,6 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint",
     "build:webview": "bun buildWebViews.ts",
     "build:android:development": "eas build --platform android --local --profile development",
     "build:android:preview": "eas build --platform android --local --profile preview",
@@ -25,6 +24,7 @@
     "@react-navigation/bottom-tabs": "^7.3.13",
     "@react-navigation/elements": "^2.4.2",
     "@react-navigation/native": "^7.1.9",
+    "@sentry/react-native": "^6.14.0",
     "babel-plugin-inline-import": "^3.0.0",
     "babel-preset-expo": "~13.0.0",
     "drizzle-orm": "^0.43.1",
@@ -78,6 +78,8 @@
     }
   },
   "trustedDependencies": [
-    "@biomejs/biome"
+    "@biomejs/biome",
+    "@sentry/cli",
+    "esbuild"
   ]
 }

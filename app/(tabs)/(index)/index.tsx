@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { ao3Url, ao3WorksUrl } from "@/constants/AO3";
 import { Colors } from "@/constants/Colors";
 import { worksWithHighestChapter } from "@/db/queries/track";
 import { tChapters, tTags, tWorks } from "@/db/schema";
@@ -17,7 +18,7 @@ import {
 
 type Work = Awaited<typeof worksWithHighestChapter>[number];
 
-export default function TabTrackerScreen() {
+export default function TabTrackStackScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
@@ -26,16 +27,6 @@ export default function TabTrackerScreen() {
     tChapters,
     tTags,
   ]);
-
-  const goToAo3Homepage = () => {
-    const ao3Url = "https://archiveofourown.org/";
-    router.navigate({
-      pathname: "/(tabs)/read",
-      params: {
-        uri: ao3Url,
-      },
-    });
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -103,7 +94,7 @@ export default function TabTrackerScreen() {
                       onPress={(e) => {
                         e.stopPropagation();
                         router.navigate({
-                          pathname: "/(tabs)/details",
+                          pathname: "/(tabs)/(index)/[workId]",
                           params: {
                             workId: work.id,
                           },
@@ -250,9 +241,18 @@ const styles = StyleSheet.create({
   },
 });
 
+const goToAo3Homepage = () => {
+  router.navigate({
+    pathname: "/(tabs)/read",
+    params: {
+      uri: ao3Url,
+    },
+  });
+};
+
 const onWorkPress = (work: Work) => {
   const workUrl = new URL(
-    `https://archiveofourown.org/works/${work.id}${
+    `${ao3WorksUrl}/${work.id}${
       work.highestChapterId ? `/chapters/${work.highestChapterId}` : ""
     }#workskin`,
   );

@@ -8,7 +8,8 @@
       "./node_modules",
       "./dist",
       "./drizzle/meta",
-      "./package.json"
+      "./package.json",
+      "./injectedWebviewScripts/*.js"
     ]
   },
   "vcs": {

@@ -33,7 +33,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="index"
+        name="(index)"
         options={{
           title: "Track",
           tabBarIcon: ({ color }) => (
@@ -48,13 +48,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="gearshape.fill" color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="details"
-        options={{
-          title: "Details",
-          href: null,
         }}
       />
     </Tabs>

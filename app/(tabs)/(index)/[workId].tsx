@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { ao3WorksUrl } from "@/constants/AO3";
 import { Colors } from "@/constants/Colors";
 import { db } from "@/db/drizzle";
 import { tChapters, tWorks } from "@/db/schema";
@@ -16,7 +17,7 @@ import {
   useColorScheme,
 } from "react-native";
 
-export default function TabTrackerScreen() {
+export default function TabDetailsStackScreen() {
   const localSearchParams = useLocalSearchParams<{
     workId?: string;
   }>();
@@ -271,7 +272,7 @@ const onChapterPress = (
   chapterProgress?: number,
 ) => {
   const workUrl = new URL(
-    `https://archiveofourown.org/works/${workId}${
+    `${ao3WorksUrl}/${workId}${
       chapterId ? `/chapters/${chapterId}` : ""
     }#workskin`,
   );
