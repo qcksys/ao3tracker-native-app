@@ -1,6 +1,16 @@
 import { db } from "@/db/drizzle";
 import { tChapters, tTags, tWorks, tagTypes } from "@/db/schema";
-import { and, desc, eq, like, lt, max, or, sql } from "drizzle-orm";
+import {
+  aliasedTable,
+  and,
+  desc,
+  eq,
+  like,
+  lt,
+  max,
+  or,
+  sql,
+} from "drizzle-orm";
 
 export const maxChapterNumberSubquery = db
   .select({
@@ -19,6 +29,8 @@ export type WorkFilter = {
 };
 
 export const worksWithHighestChapter = (filter?: WorkFilter) => {
+  const tFandom = aliasedTable(tTags, "fandom");
+
   const query = db
     .select({
       id: tWorks.id,
@@ -30,7 +42,7 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
       highestChapterProgress: tChapters.lastChapterProgress,
       lastUpdated: tWorks.lastUpdated,
       lastRead: tWorks.lastRead,
-      fandoms: sql<string>`GROUP_CONCAT(${tTags.tag}, ', ')`.as("fandoms"),
+      fandoms: sql<string>`GROUP_CONCAT(${tFandom.tag}, ', ')`.as("fandoms"),
     })
     .from(tWorks)
     .leftJoin(
@@ -53,6 +65,11 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
     if (filter.inProgressOnly) {
       conditions.push(lt(tChapters.chapterNumber, tWorks.chapters));
     }
+    if (filter.fandom) {
+      conditions.push(
+        and(eq(tTags.tag, filter.fandom), eq(tTags.typeId, tagTypes.fandom)),
+      );
+    }
     if (filter.searchQuery && filter.searchQuery.trim() !== "") {
       const searchTerm = `%${filter.searchQuery.trim()}%`;
       conditions.push(
@@ -63,22 +80,11 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
 
   return query
     .leftJoin(
-      tTags,
-      and(eq(tTags.workId, tWorks.id), eq(tTags.typeId, tagTypes.fandom)),
+      tFandom,
+      and(eq(tFandom.workId, tWorks.id), eq(tFandom.typeId, tagTypes.fandom)),
     )
-    .where(
-      conditions.length > 0
-        ? and(
-            ...[
-              ...conditions,
-              // Add fandom filter if present
-              ...(filter?.fandom ? [eq(tTags.tag, filter.fandom)] : []),
-            ],
-          )
-        : filter?.fandom
-          ? eq(tTags.tag, filter.fandom)
-          : undefined,
-    )
+    .leftJoin(tTags, and(eq(tTags.workId, tWorks.id)))
+    .where(conditions.length > 0 ? and(...[...conditions]) : undefined)
     .groupBy(
       tWorks.id,
       tWorks.title,
