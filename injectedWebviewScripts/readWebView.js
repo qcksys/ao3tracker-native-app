@@ -88,7 +88,7 @@ var scrollTo = (scrollToParam) => {
 var url = new URL(window.location.href);
 var urlParts = url.pathname.split("/").filter(Boolean);
 var scrollToParam = url.searchParams.get("scrollTo");
-if (urlParts[0] === "works") {
+if (urlParts[0] === "works" && !Number.isNaN(Number(urlParts[1]))) {
   window.addEventListener("scroll", updateScrollPercentageToQueryParam);
   window.ReactNativeWebView.postMessage(getWorkInfo());
   window.ReactNativeWebView.postMessage(getWorkTagInfo());

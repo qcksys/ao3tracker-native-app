@@ -12,6 +12,7 @@ export const tWorks = sqliteTable("works", {
   chapters: integer({ mode: "number" }),
   lastUpdated: integer({ mode: "timestamp" }),
   lastRead: integer({ mode: "timestamp" }),
+  author: text(),
   rowCreatedAt: integer({ mode: "timestamp" })
     .$default(() => new Date())
     .notNull(),

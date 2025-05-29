@@ -26,11 +26,36 @@ export default function TabTrackerScreen() {
     tChapters,
   ]);
 
+  const goToAo3Homepage = () => {
+    const ao3Url = "https://archiveofourown.org/";
+    router.navigate({
+      pathname: "/(tabs)/read",
+      params: {
+        uri: ao3Url,
+      },
+    });
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        Tracked Works
-      </ThemedText>
+      <View style={styles.headerRow}>
+        <ThemedText type="title" style={styles.title}>
+          Tracked Works
+        </ThemedText>
+        <Pressable
+          style={({ pressed }) => [
+            styles.ao3Button,
+            { backgroundColor: pressed ? colors.foreground : colors.primary },
+          ]}
+          onPress={goToAo3Homepage}
+        >
+          <ThemedText
+            style={[styles.ao3ButtonText, { color: colors.background }]}
+          >
+            Browse AO3
+          </ThemedText>
+        </Pressable>
+      </View>
 
       {data.length === 0 ? (
         <ThemedText style={[styles.noDataText, { color: colors.icon }]}>
@@ -130,10 +155,24 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: Constants.statusBarHeight,
   },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    marginVertical: 10,
+  },
+  ao3Button: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  ao3ButtonText: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
   title: {
-    marginBottom: 10,
-    marginTop: 10,
-    textAlign: "center",
+    flex: 1,
   },
   tableContainer: {
     flex: 1,

@@ -2,6 +2,7 @@ import { ThemedView } from "@/components/ThemedView";
 import TrackedWebView from "@/components/TrackedWebView";
 import Constants from "expo-constants";
 import { useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 
 export default function TabReadScreen() {
@@ -11,7 +12,9 @@ export default function TabReadScreen() {
   const initialUri =
     typeof uri === "string" ? uri : "https://archiveofourown.org/";
 
-  console.log("opening browser on", initialUri);
+  useEffect(() => {
+    console.log("opening browser on", initialUri);
+  }, [initialUri]);
 
   return (
     <ThemedView style={styles.container}>
