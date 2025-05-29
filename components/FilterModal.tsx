@@ -44,44 +44,52 @@ export function FilterModal({
 
   const { data: tags } = useLiveQuery(getAllTags, [tTags]);
 
-  // Group tags by type
-  const rating: string[] = [];
-  const category: string[] = [];
-  const fandom: string[] = [];
-  const relationship: string[] = [];
-  const character: string[] = [];
-  const freeform: string[] = [];
+  // Create state for tag lists
+  const [tagLists, setTagLists] = useState<Record<TActiveTagTypes, string[]>>({
+    rating: [],
+    category: [],
+    fandom: [],
+    relationship: [],
+    character: [],
+    freeform: [],
+  });
 
   useEffect(() => {
-    rating.length = 0;
-    category.length = 0;
-    fandom.length = 0;
-    relationship.length = 0;
-    character.length = 0;
-    freeform.length = 0;
+    if (!tags) return;
+
+    const newTagLists: Record<TActiveTagTypes, string[]> = {
+      rating: [],
+      category: [],
+      fandom: [],
+      relationship: [],
+      character: [],
+      freeform: [],
+    };
 
     for (const tag of tags) {
       switch (tag.typeId) {
         case tagTypes.rating:
-          rating.push(tag.tag);
+          newTagLists.rating.push(tag.tag);
           break;
         case tagTypes.category:
-          category.push(tag.tag);
+          newTagLists.category.push(tag.tag);
           break;
         case tagTypes.fandom:
-          fandom.push(tag.tag);
+          newTagLists.fandom.push(tag.tag);
           break;
         case tagTypes.relationship:
-          relationship.push(tag.tag);
+          newTagLists.relationship.push(tag.tag);
           break;
         case tagTypes.character:
-          character.push(tag.tag);
+          newTagLists.character.push(tag.tag);
           break;
         case tagTypes.freeform:
-          freeform.push(tag.tag);
+          newTagLists.freeform.push(tag.tag);
           break;
       }
     }
+
+    setTagLists(newTagLists);
   }, [tags]);
 
   useEffect(() => {
@@ -129,7 +137,10 @@ export function FilterModal({
 
       return {
         ...prev,
-        [type]: updatedTags.length > 0 ? updatedTags : undefined,
+        tags: {
+          ...prev.tags,
+          [type]: updatedTags.length > 0 ? updatedTags : undefined,
+        },
       };
     });
   };
@@ -137,7 +148,10 @@ export function FilterModal({
   const clearTagsForType = (type: TTagType) => {
     setTempFilter((prev) => ({
       ...prev,
-      [type]: undefined,
+      tags: {
+        ...prev.tags,
+        [type]: undefined,
+      },
     }));
   };
 
@@ -146,22 +160,9 @@ export function FilterModal({
   };
 
   const getTagsForType = (type: TTagType): string[] => {
-    switch (type) {
-      case "rating":
-        return rating;
-      case "category":
-        return category;
-      case "fandom":
-        return fandom;
-      case "relationship":
-        return relationship;
-      case "character":
-        return character;
-      case "freeform":
-        return freeform;
-      default:
-        return [];
-    }
+    if (type === "unknown" || type === "warning") return [];
+
+    return tagLists[type as TActiveTagTypes] || [];
   };
 
   return (
