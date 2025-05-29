@@ -47,6 +47,7 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
       fandoms: sql<string>`GROUP_CONCAT(${tFandom.tag}, ', ')`.as("fandoms"),
     })
     .from(tWorks)
+    .leftJoin(tTags, eq(tTags.workId, tWorks.id))
     .leftJoin(
       maxChapterNumberSubquery,
       eq(tWorks.id, maxChapterNumberSubquery.workId),
@@ -73,7 +74,7 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
         if (tags) {
           const tagType = type as TActiveTagTypes;
           conditions.push(
-            and(inArray(tTags.tag, tags), eq(tTags, tagTypes[tagType])),
+            and(inArray(tTags.tag, tags), eq(tTags.typeId, tagTypes[tagType])),
           );
         }
       }
