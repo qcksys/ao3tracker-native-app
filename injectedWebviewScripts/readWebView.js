@@ -1,1 +1,98 @@
-var a=()=>{let t=document.getElementById("chapters"),o;if(t){let u=t.getBoundingClientRect(),d=window.scrollY||window.pageYOffset,g=d+u.top,s=u.height;if(s===0)return 0;let l=d-g,c=0;if(l<=0)c=0;else if(l>=s)c=100;else c=l/s*100;o=Math.max(0,Math.min(100,c))}if(o===void 0||Number.isNaN(o))return;let e=Math.floor(o).toString(),n=new URL(window.location.href),i=n.searchParams.get("scroll");if(i!==null&&i===e)return;n.searchParams.set("scroll",e),window.history.replaceState({},"",n.toString())};var p=()=>{let t={type:"workInfo",url:window.location.href,workName:document.querySelector("#workskin h2.title.heading")?.textContent?.trim(),workLastUpdated:(document.querySelector(".work.meta.group .stats dd.status")||document.querySelector(".work.meta.group .stats dd.published"))?.textContent?.trim(),chapterName:document.querySelector("#chapters div.chapter div.chapter.preface.group h3.title")?.textContent?.trim(),chapterNumber:document.querySelector("#chapters div.chapter")?.id,totalChapters:document.querySelector(".work.meta.group .stats dd.chapters")?.textContent?.trim(),authorUrl:document.querySelector("#workskin .byline.heading a")?.getAttribute("href")??void 0};return JSON.stringify(t)};var r=(t)=>{return Array.from(document.querySelectorAll(`.work.meta.group dd.${t}.tags a`)).map((e)=>({tag:e?.innerText,href:e?.getAttribute("href")}))},m=()=>{let t={type:"workTags",url:window.location.href,workLastUpdated:(document.querySelector(".work.meta.group .stats dd.status")||document.querySelector(".work.meta.group .stats dd.published"))?.textContent?.trim(),rating:r("rating")[0],warnings:[],category:r("category"),fandom:r("fandom"),relationship:r("relationship"),character:r("character"),freeform:r("freeform")};return JSON.stringify(t)};var h=(t)=>{let o=Number.parseInt(t,10),e=document.getElementById("chapters");if(e&&!Number.isNaN(o)){let n=e.getBoundingClientRect().height,i=e.offsetTop+n*o/100;window.scrollTo(0,i)}};var f=new URL(window.location.href),k=f.pathname.split("/").filter(Boolean),w=f.searchParams.get("scrollTo");if(k[0]==="works")window.addEventListener("scroll",a),window.ReactNativeWebView.postMessage(p()),window.ReactNativeWebView.postMessage(m());if(w)h(w);
+// injectedWebviewScripts/shared/getPagePosition.ts
+var updateScrollPercentageToQueryParam = () => {
+  const element = document.getElementById("chapters");
+  let scrollPercentage;
+  if (element) {
+    const rect = element.getBoundingClientRect();
+    const viewportTop = window.scrollY || window.pageYOffset;
+    const elementAbsoluteTop = viewportTop + rect.top;
+    const elementHeight = rect.height;
+    if (elementHeight === 0) {
+      return 0;
+    }
+    const scrollDistanceIntoElement = viewportTop - elementAbsoluteTop;
+    let progress = 0;
+    if (scrollDistanceIntoElement <= 0) {
+      progress = 0;
+    } else if (scrollDistanceIntoElement >= elementHeight) {
+      progress = 100;
+    } else {
+      progress = scrollDistanceIntoElement / elementHeight * 100;
+    }
+    scrollPercentage = Math.max(0, Math.min(100, progress));
+  }
+  if (scrollPercentage === undefined || Number.isNaN(scrollPercentage)) {
+    return;
+  }
+  const roundedScrollPercentage = Math.floor(scrollPercentage).toString();
+  const url = new URL(window.location.href);
+  const currentPercentage = url.searchParams.get("scroll");
+  if (currentPercentage !== null && currentPercentage === roundedScrollPercentage) {
+    return;
+  }
+  url.searchParams.set("scroll", roundedScrollPercentage);
+  window.history.replaceState({}, "", url.toString());
+};
+
+// injectedWebviewScripts/shared/getWorkInfo.ts
+var getWorkInfo = () => {
+  const workInfo = {
+    type: "workInfo",
+    url: window.location.href,
+    workName: document.querySelector("#workskin h2.title.heading")?.textContent?.trim(),
+    workLastUpdated: (document.querySelector(".work.meta.group .stats dd.status") || document.querySelector(".work.meta.group .stats dd.published"))?.textContent?.trim(),
+    chapterName: document.querySelector("#chapters div.chapter div.chapter.preface.group h3.title")?.textContent?.trim(),
+    chapterNumber: document.querySelector("#chapters div.chapter")?.id,
+    totalChapters: document.querySelector(".work.meta.group .stats dd.chapters")?.textContent?.trim(),
+    authorUrl: document.querySelector("#workskin .byline.heading a")?.getAttribute("href") ?? undefined
+  };
+  return JSON.stringify(workInfo);
+};
+
+// injectedWebviewScripts/shared/getWorkTagInfo.ts
+var getArrayOfTagsFromAnchorElements = (type) => {
+  const arrayOfAnchorElements = Array.from(document.querySelectorAll(`.work.meta.group dd.${type}.tags a`));
+  return arrayOfAnchorElements.map((anchor) => ({
+    tag: anchor?.innerText,
+    href: anchor?.getAttribute("href")
+  }));
+};
+var getWorkTagInfo = () => {
+  const workInfo = {
+    type: "workTags",
+    url: window.location.href,
+    workLastUpdated: (document.querySelector(".work.meta.group .stats dd.status") || document.querySelector(".work.meta.group .stats dd.published"))?.textContent?.trim(),
+    rating: getArrayOfTagsFromAnchorElements("rating")[0],
+    warnings: [],
+    category: getArrayOfTagsFromAnchorElements("category"),
+    fandom: getArrayOfTagsFromAnchorElements("fandom"),
+    relationship: getArrayOfTagsFromAnchorElements("relationship"),
+    character: getArrayOfTagsFromAnchorElements("character"),
+    freeform: getArrayOfTagsFromAnchorElements("freeform")
+  };
+  return JSON.stringify(workInfo);
+};
+
+// injectedWebviewScripts/shared/scrollTo.ts
+var scrollTo = (scrollToParam) => {
+  const scrollPosition = Number.parseInt(scrollToParam, 10);
+  const chaptersElement = document.getElementById("chapters");
+  if (chaptersElement && !Number.isNaN(scrollPosition)) {
+    const elementHeight = chaptersElement.getBoundingClientRect().height;
+    const scrollTo2 = chaptersElement.offsetTop + elementHeight * scrollPosition / 100;
+    window.scrollTo(0, scrollTo2);
+  }
+};
+
+// injectedWebviewScripts/readWebView.ts
+var url = new URL(window.location.href);
+var urlParts = url.pathname.split("/").filter(Boolean);
+var scrollToParam = url.searchParams.get("scrollTo");
+if (urlParts[0] === "works") {
+  window.addEventListener("scroll", updateScrollPercentageToQueryParam);
+  window.ReactNativeWebView.postMessage(getWorkInfo());
+  window.ReactNativeWebView.postMessage(getWorkTagInfo());
+}
+if (scrollToParam) {
+  scrollTo(scrollToParam);
+}

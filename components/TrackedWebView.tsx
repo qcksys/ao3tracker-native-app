@@ -3,9 +3,11 @@ import { db } from "@/db/drizzle";
 import { tChapters, tWorks } from "@/db/schema";
 import { readWebViewScript } from "@/util/readWebViewScript";
 import {
+  type TWorkInfoEvent,
   parseNavStateUrl,
   parseWorkInfoEvent,
   workInfoEvent,
+  workTagsInfoEvent,
 } from "@/util/workInfoParser";
 import { onConflictDoUpdateConfig } from "@qcksys/drizzle-extensions/onConflictDoUpdate";
 import { and, eq } from "drizzle-orm";
@@ -49,30 +51,6 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
     }
   }, [props.source]);
 
-  const handleWebViewNavigationStateChange = async (
-    newNavState: WebViewNavigation,
-  ) => {
-    const { url } = newNavState;
-    if (!url) return;
-
-    if (lastNavState?.toString() !== url) {
-      setLastNavState(new URL(url));
-
-      const pageInfo = parseNavStateUrl(lastNavState);
-      if (pageInfo.workId && (pageInfo.chapterId || pageInfo.chapterId === 0)) {
-        const progressUpdate = await db
-          .update(tChapters)
-          .set({ lastChapterProgress: pageInfo.scroll })
-          .where(
-            and(
-              eq(tChapters.id, pageInfo.chapterId),
-              eq(tChapters.workId, pageInfo.workId),
-            ),
-          );
-      }
-    }
-  };
-
   useEffect(() => {
     const handleBackButtonPress = () => {
       try {
@@ -96,61 +74,27 @@ const TrackedWebView: React.FC<WebViewProps> = (props) => {
     };
   }, []);
 
-  const onMessage = async (event: WebViewMessageEvent) => {
-    const eventData = JSON.parse(event.nativeEvent.data);
+  const handleWebViewNavigationStateChange = async (
+    newNavState: WebViewNavigation,
+  ) => {
+    const { url } = newNavState;
+    if (!url) return;
 
-    switch (eventData.type) {
-      case "workInfo": {
-        const parsed = workInfoEvent.safeParse(eventData);
-        if (parsed.success) {
-          const workInfo = parseWorkInfoEvent(parsed.data);
+    if (lastNavState?.toString() !== url) {
+      setLastNavState(new URL(url));
 
-          if (workInfo.workUrlData.workId) {
-            try {
-              const workInsert = await db
-                .insert(tWorks)
-                .values({
-                  id: workInfo.workUrlData.workId,
-                  title: workInfo.workName,
-                  chapters: workInfo.totalChapters,
-                  lastUpdated: workInfo.workLastUpdated,
-                  lastRead: new Date(),
-                })
-                .onConflictDoUpdate(onConflictDoUpdateConfig(tWorks));
-
-              const chapterInsert = await db
-                .insert(tChapters)
-                .values({
-                  id: workInfo.workUrlData.chapterId ?? 0,
-                  workId: workInfo.workUrlData.workId,
-                  title: workInfo.chapterName,
-                  chapterNumber: workInfo.chapterNumber,
-                  lastRead: new Date(),
-                })
-                .onConflictDoUpdate(
-                  onConflictDoUpdateConfig(tChapters, {
-                    target: [tChapters.id, tChapters.workId],
-                  }),
-                );
-
-              console.log("workInfo DB Update", workInsert, chapterInsert);
-            } catch (err) {
-              console.error(err);
-            }
-          } else {
-            console.warn("Work ID not found in workInfo event data", workInfo);
-          }
-        } else {
-          console.error("Error parsing workInfo", parsed, eventData);
-        }
-        return;
+      const pageInfo = parseNavStateUrl(lastNavState);
+      if (pageInfo.workId && (pageInfo.chapterId || pageInfo.chapterId === 0)) {
+        const progressUpdate = await db
+          .update(tChapters)
+          .set({ lastChapterProgress: pageInfo.scroll })
+          .where(
+            and(
+              eq(tChapters.id, pageInfo.chapterId),
+              eq(tChapters.workId, pageInfo.workId),
+            ),
+          );
       }
-      default:
-        console.warn(
-          `Unknown event type: ${eventData.type}, Event: `,
-          eventData,
-        );
-        break;
     }
   };
 
@@ -196,5 +140,75 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+
+const onMessage = async (event: WebViewMessageEvent) => {
+  const eventData = JSON.parse(event.nativeEvent.data);
+  switch (eventData.type) {
+    case "workInfo": {
+      await onMessageWorkInfo(eventData);
+      return;
+    }
+    case "workTags": {
+      await onMessageWorkTags(eventData);
+      return;
+    }
+    default:
+      console.warn(`Unknown event type: ${eventData.type}, Event: `, eventData);
+      break;
+  }
+};
+const onMessageWorkInfo = async (eventData: TWorkInfoEvent) => {
+  const parsed = workInfoEvent.safeParse(eventData);
+  if (parsed.success) {
+    const workInfo = parseWorkInfoEvent(parsed.data);
+
+    if (workInfo.workUrlData.workId) {
+      try {
+        const workInsert = await db
+          .insert(tWorks)
+          .values({
+            id: workInfo.workUrlData.workId,
+            title: workInfo.workName,
+            chapters: workInfo.totalChapters,
+            lastUpdated: workInfo.workLastUpdated,
+            lastRead: new Date(),
+          })
+          .onConflictDoUpdate(onConflictDoUpdateConfig(tWorks));
+
+        const chapterInsert = await db
+          .insert(tChapters)
+          .values({
+            id: workInfo.workUrlData.chapterId ?? 0,
+            workId: workInfo.workUrlData.workId,
+            title: workInfo.chapterName,
+            chapterNumber: workInfo.chapterNumber,
+            lastRead: new Date(),
+          })
+          .onConflictDoUpdate(
+            onConflictDoUpdateConfig(tChapters, {
+              target: [tChapters.id, tChapters.workId],
+            }),
+          );
+
+        console.log("workInfo DB Update", workInsert, chapterInsert);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      console.warn("Work ID not found in workInfo event data", workInfo);
+    }
+  } else {
+    console.error("Error parsing workInfo", parsed, eventData);
+  }
+};
+const onMessageWorkTags = async (eventData: TWorkInfoEvent) => {
+  const parsed = workTagsInfoEvent.safeParse(eventData);
+  if (parsed.success) {
+    console.log(parsed.data);
+  } else {
+    console.error("Error parsing workInfo", parsed, eventData);
+  }
+  return;
+};
 
 export default TrackedWebView;

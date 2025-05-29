@@ -4,6 +4,6 @@ await Promise.all([
     outdir: "./injectedWebviewScripts",
     format: "esm",
     naming: "[dir]/[name].js",
-    minify: true,
+    // minify: true,
   }),
 ]);
