@@ -49,8 +49,9 @@ export const tagTypes = {
   character: 6,
   freeform: 7,
 } as const;
-export type TTagType = typeof tagTypes;
-export type TTagTypeId = TTagType[keyof TTagType];
+export type TTagTypes = typeof tagTypes;
+export type TTagType = keyof TTagTypes;
+export type TTagTypeId = TTagTypes[TTagType];
 
 export const tTags = sqliteTable(
   "tags",

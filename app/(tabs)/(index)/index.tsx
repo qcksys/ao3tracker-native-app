@@ -25,7 +25,7 @@ export default function TabTrackStackScreen() {
   const colors = Colors[colorScheme ?? "light"];
 
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [filter, setFilter] = useState<WorkFilter>({});
+  const [filter, setFilter] = useState<WorkFilter>({ tags: {} });
 
   const { data } = useLiveTablesQuery(
     worksWithHighestChapter(filter),
@@ -41,7 +41,12 @@ export default function TabTrackStackScreen() {
     filter.completedOnly === true ||
     filter.inProgressOnly === true ||
     (filter.searchQuery && filter.searchQuery.trim() !== "") ||
-    !!filter.fandom;
+    (filter.tags.rating && filter.tags.rating.length > 0) ||
+    (filter.tags.category && filter.tags.category.length > 0) ||
+    (filter.tags.fandom && filter.tags.fandom.length > 0) ||
+    (filter.tags.relationship && filter.tags.relationship.length > 0) ||
+    (filter.tags.character && filter.tags.character.length > 0) ||
+    (filter.tags.freeform && filter.tags.freeform.length > 0);
 
   return (
     <ThemedView style={styles.container}>

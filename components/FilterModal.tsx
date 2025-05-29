@@ -1,60 +1,90 @@
 import { Colors } from "@/constants/Colors";
-import { getAllFandoms } from "@/db/queries/track";
+import { getAllTags } from "@/db/queries/track";
 import type { WorkFilter } from "@/db/queries/track";
-import { tTags } from "@/db/schema";
-import { Ionicons } from "@expo/vector-icons";
+import { type TTagType, tTags, tagTypes } from "@/db/schema";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useState, useEffect } from "react";
 import {
-  FlatList,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
-  TextInput,
-  TouchableOpacity,
   View,
   useColorScheme,
 } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
+import { SearchFilter } from "./filters/SearchFilter";
+import { StatusFilter } from "./filters/StatusFilter";
+import { TagFilter } from "./filters/TagFilter";
+import { TagsDropdown } from "./filters/TagsDropdown";
 
-interface FilterModalProps {
+type TFilterModalProps = {
   visible: boolean;
   onClose: () => void;
   filter: WorkFilter;
   onApplyFilter: (filter: WorkFilter) => void;
-}
+};
+
+export type TActiveTagTypes = Exclude<TTagType, "unknown" | "warning">;
 
 export function FilterModal({
   visible,
   onClose,
   filter,
   onApplyFilter,
-}: FilterModalProps) {
+}: TFilterModalProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
   const [tempFilter, setTempFilter] = React.useState<WorkFilter>(filter);
-  const [showFandomDropdown, setShowFandomDropdown] = useState(false);
-  const [fandomSearch, setFandomSearch] = useState("");
+  const [activeDropdown, setActiveDropdown] = useState<TActiveTagTypes | null>(
+    null,
+  );
 
-  // Get all fandoms for the dropdown
-  const { data: fandoms } = useLiveQuery(getAllFandoms, [tTags]);
-  const [filteredFandoms, setFilteredFandoms] = useState<typeof fandoms>([]);
+  const { data: tags } = useLiveQuery(getAllTags, [tTags]);
+
+  // Group tags by type
+  const rating: string[] = [];
+  const category: string[] = [];
+  const fandom: string[] = [];
+  const relationship: string[] = [];
+  const character: string[] = [];
+  const freeform: string[] = [];
 
   useEffect(() => {
-    if (fandoms) {
-      setFilteredFandoms(
-        fandomSearch
-          ? fandoms.filter((f) =>
-              f.tag.toLowerCase().includes(fandomSearch.toLowerCase()),
-            )
-          : fandoms,
-      );
-    }
-  }, [fandoms, fandomSearch]);
+    rating.length = 0;
+    category.length = 0;
+    fandom.length = 0;
+    relationship.length = 0;
+    character.length = 0;
+    freeform.length = 0;
 
-  React.useEffect(() => {
+    for (const tag of tags) {
+      switch (tag.typeId) {
+        case tagTypes.rating:
+          rating.push(tag.tag);
+          break;
+        case tagTypes.category:
+          category.push(tag.tag);
+          break;
+        case tagTypes.fandom:
+          fandom.push(tag.tag);
+          break;
+        case tagTypes.relationship:
+          relationship.push(tag.tag);
+          break;
+        case tagTypes.character:
+          character.push(tag.tag);
+          break;
+        case tagTypes.freeform:
+          freeform.push(tag.tag);
+          break;
+      }
+    }
+  }, [tags]);
+
+  useEffect(() => {
     setTempFilter(filter);
   }, [filter]);
 
@@ -64,7 +94,9 @@ export function FilterModal({
   };
 
   const resetFilters = () => {
-    const emptyFilter: WorkFilter = {};
+    const emptyFilter: WorkFilter = {
+      tags: {},
+    };
     setTempFilter(emptyFilter);
     onApplyFilter(emptyFilter);
     onClose();
@@ -74,7 +106,7 @@ export function FilterModal({
     setTempFilter((prev) => ({
       ...prev,
       completedOnly: !prev.completedOnly,
-      inProgressOnly: prev.completedOnly ? prev.inProgressOnly : false, // Can't have both
+      inProgressOnly: prev.completedOnly ? prev.inProgressOnly : false,
     }));
   };
 
@@ -82,17 +114,54 @@ export function FilterModal({
     setTempFilter((prev) => ({
       ...prev,
       inProgressOnly: !prev.inProgressOnly,
-      completedOnly: prev.inProgressOnly ? prev.completedOnly : false, // Can't have both
+      completedOnly: prev.inProgressOnly ? prev.completedOnly : false,
     }));
   };
 
-  const selectFandom = (fandom: string | null) => {
+  const toggleTagSelection = (tag: string, type: TTagType) => {
+    setTempFilter((prev) => {
+      if (type === "unknown" || type === "warning") return prev;
+
+      const currentTags = prev.tags[type] || [];
+      const updatedTags = currentTags.includes(tag)
+        ? currentTags.filter((t) => t !== tag)
+        : [...currentTags, tag];
+
+      return {
+        ...prev,
+        [type]: updatedTags.length > 0 ? updatedTags : undefined,
+      };
+    });
+  };
+
+  const clearTagsForType = (type: TTagType) => {
     setTempFilter((prev) => ({
       ...prev,
-      fandom: fandom || undefined,
+      [type]: undefined,
     }));
-    setShowFandomDropdown(false);
-    setFandomSearch("");
+  };
+
+  const openDropdown = (type: TActiveTagTypes) => {
+    setActiveDropdown(type);
+  };
+
+  const getTagsForType = (type: TTagType): string[] => {
+    switch (type) {
+      case "rating":
+        return rating;
+      case "category":
+        return category;
+      case "fandom":
+        return fandom;
+      case "relationship":
+        return relationship;
+      case "character":
+        return character;
+      case "freeform":
+        return freeform;
+      default:
+        return [];
+    }
   };
 
   return (
@@ -104,208 +173,125 @@ export function FilterModal({
     >
       <View style={styles.centeredView}>
         <ThemedView style={styles.modalView}>
-          <ThemedText type="title" style={styles.modalTitle}>
-            Filter Works
-          </ThemedText>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <ThemedText type="title" style={styles.modalTitle}>
+              Filter Works
+            </ThemedText>
 
-          <View style={styles.searchContainer}>
-            <ThemedText style={styles.filterLabel}>Search</ThemedText>
-            <TextInput
-              style={[
-                styles.searchInput,
-                {
-                  backgroundColor: colors.background,
-                  color: colors.foreground,
-                  borderColor: colors.border,
-                },
-              ]}
-              placeholder="Title or author"
-              placeholderTextColor={colors.icon}
-              value={tempFilter.searchQuery || ""}
+            <SearchFilter
+              value={tempFilter.searchQuery}
               onChangeText={(text) =>
                 setTempFilter((prev) => ({ ...prev, searchQuery: text }))
               }
+              placeholder="Title or author"
+              label="Search"
             />
-          </View>
 
-          <View style={styles.searchContainer}>
-            <ThemedText style={styles.filterLabel}>Fandom</ThemedText>
-            <Pressable
-              style={[
-                styles.searchInput,
-                {
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  paddingRight: 10,
-                },
-              ]}
-              onPress={() => setShowFandomDropdown(true)}
-            >
-              <ThemedText
-                style={{
-                  color: tempFilter.fandom ? colors.foreground : colors.icon,
-                  flex: 1,
-                }}
-                numberOfLines={1}
-              >
-                {tempFilter.fandom || "Select a fandom"}
-              </ThemedText>
-              <Ionicons
-                name="chevron-down"
-                size={16}
-                color={colors.foreground}
-              />
-            </Pressable>
+            <TagFilter
+              type="rating"
+              label="Rating"
+              selectedTags={tempFilter.tags.rating}
+              placeholder="Select a rating"
+              onPress={() => openDropdown("rating")}
+              onClearAll={() => clearTagsForType("rating")}
+              isMultiSelect={false}
+            />
+            <TagFilter
+              type="category"
+              label="Categories"
+              selectedTags={tempFilter.tags.category}
+              placeholder="Select categories"
+              onPress={() => openDropdown("category")}
+              onClearAll={() => clearTagsForType("category")}
+              isMultiSelect={true}
+              onRemoveTag={(tag) => toggleTagSelection(tag, "rating")}
+            />
+            <TagFilter
+              type="fandom"
+              label="Fandoms"
+              selectedTags={tempFilter.tags.fandom}
+              placeholder="Select fandom(s)"
+              onPress={() => openDropdown("fandom")}
+              onClearAll={() => clearTagsForType("fandom")}
+              isMultiSelect={true}
+              onRemoveTag={(tag) => toggleTagSelection(tag, "fandom")}
+            />
+            <TagFilter
+              type="relationship"
+              label="Relationships"
+              selectedTags={tempFilter.tags.relationship}
+              placeholder="Select relationship(s)"
+              onPress={() => openDropdown("relationship")}
+              onClearAll={() => clearTagsForType("relationship")}
+              isMultiSelect={true}
+              onRemoveTag={(tag) => toggleTagSelection(tag, "relationship")}
+            />
+            <TagFilter
+              type="character"
+              label="Characters"
+              selectedTags={tempFilter.tags.character}
+              placeholder="Select character(s)"
+              onPress={() => openDropdown("character")}
+              onClearAll={() => clearTagsForType("character")}
+              isMultiSelect={true}
+              onRemoveTag={(tag) => toggleTagSelection(tag, "character")}
+            />
+            <TagFilter
+              type="freeform"
+              label="Freeform"
+              selectedTags={tempFilter.tags.freeform}
+              placeholder="Select freeform tag(s)"
+              onPress={() => openDropdown("freeform")}
+              onClearAll={() => clearTagsForType("freeform")}
+              isMultiSelect={true}
+              onRemoveTag={(tag) => toggleTagSelection(tag, "freeform")}
+            />
 
-            {tempFilter.fandom && (
+            <StatusFilter
+              completedOnly={tempFilter.completedOnly}
+              inProgressOnly={tempFilter.inProgressOnly}
+              onToggleCompleted={toggleCompletedOnly}
+              onToggleInProgress={toggleInProgressOnly}
+            />
+
+            <View style={styles.buttonContainer}>
               <Pressable
-                style={styles.clearFandom}
-                onPress={() => selectFandom(null)}
+                style={[styles.button, { backgroundColor: colors.border }]}
+                onPress={resetFilters}
               >
-                <ThemedText style={{ color: colors.primary }}>Clear</ThemedText>
+                <ThemedText style={styles.buttonText}>Reset</ThemedText>
               </Pressable>
-            )}
-
-            {showFandomDropdown && (
-              <View
-                style={[
-                  styles.dropdownContainer,
-                  {
-                    backgroundColor: colors.background,
-                    borderColor: colors.border,
-                  },
-                ]}
-              >
-                <TextInput
-                  style={[
-                    styles.searchInput,
-                    {
-                      backgroundColor: colors.background,
-                      color: colors.foreground,
-                      borderColor: colors.border,
-                      marginBottom: 5,
-                      height: 36,
-                    },
-                  ]}
-                  placeholder="Search fandoms..."
-                  placeholderTextColor={colors.icon}
-                  value={fandomSearch}
-                  onChangeText={setFandomSearch}
-                />
-                <FlatList
-                  data={filteredFandoms}
-                  keyExtractor={(item) => item.tag}
-                  style={styles.dropdownList}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={[
-                        styles.dropdownItem,
-                        tempFilter.fandom === item.tag && {
-                          backgroundColor: `${colors.primary}30`,
-                        },
-                      ]}
-                      onPress={() => selectFandom(item.tag)}
-                    >
-                      <ThemedText>{item.tag}</ThemedText>
-                    </TouchableOpacity>
-                  )}
-                  ListEmptyComponent={
-                    <View style={styles.emptyList}>
-                      <ThemedText>No fandoms found</ThemedText>
-                    </View>
-                  }
-                />
-                <Pressable
-                  style={[
-                    styles.closeDropdownButton,
-                    { backgroundColor: colors.primary },
-                  ]}
-                  onPress={() => setShowFandomDropdown(false)}
-                >
-                  <ThemedText style={{ color: colors.background }}>
-                    Close
-                  </ThemedText>
-                </Pressable>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.filterSection}>
-            <ThemedText style={styles.filterLabel}>Status</ThemedText>
-            <View style={styles.filterOptions}>
               <Pressable
-                style={[
-                  styles.filterOption,
-                  {
-                    backgroundColor: colors.background,
-                    borderColor: colors.border,
-                  },
-                  tempFilter.completedOnly && {
-                    backgroundColor: colors.primary,
-                  },
-                ]}
-                onPress={toggleCompletedOnly}
+                style={[styles.button, { backgroundColor: colors.primary }]}
+                onPress={applyFilters}
               >
                 <ThemedText
-                  style={[
-                    styles.filterOptionText,
-                    tempFilter.completedOnly && { color: colors.background },
-                  ]}
+                  style={[styles.buttonText, { color: colors.background }]}
                 >
-                  Completed
-                </ThemedText>
-              </Pressable>
-
-              <Pressable
-                style={[
-                  styles.filterOption,
-                  {
-                    backgroundColor: colors.background,
-                    borderColor: colors.border,
-                  },
-                  tempFilter.inProgressOnly && {
-                    backgroundColor: colors.primary,
-                  },
-                ]}
-                onPress={toggleInProgressOnly}
-              >
-                <ThemedText
-                  style={[
-                    styles.filterOptionText,
-                    tempFilter.inProgressOnly && { color: colors.background },
-                  ]}
-                >
-                  In Progress
+                  Apply
                 </ThemedText>
               </Pressable>
             </View>
-          </View>
 
-          <View style={styles.buttonContainer}>
-            <Pressable
-              style={[styles.button, { backgroundColor: colors.border }]}
-              onPress={resetFilters}
-            >
-              <ThemedText style={styles.buttonText}>Reset</ThemedText>
-            </Pressable>
-            <Pressable
-              style={[styles.button, { backgroundColor: colors.primary }]}
-              onPress={applyFilters}
-            >
-              <ThemedText
-                style={[styles.buttonText, { color: colors.background }]}
-              >
-                Apply
+            <Pressable style={[styles.closeButton]} onPress={onClose}>
+              <ThemedText style={{ color: colors.foreground }}>
+                Cancel
               </ThemedText>
             </Pressable>
-          </View>
+          </ScrollView>
 
-          <Pressable style={[styles.closeButton]} onPress={onClose}>
-            <ThemedText style={{ color: colors.foreground }}>Cancel</ThemedText>
-          </Pressable>
+          <TagsDropdown
+            visible={activeDropdown !== null}
+            tags={activeDropdown ? getTagsForType(activeDropdown) : []}
+            selectedTags={
+              activeDropdown ? tempFilter.tags[activeDropdown] : undefined
+            }
+            onClose={() => setActiveDropdown(null)}
+            onSelectTag={(tag) =>
+              activeDropdown && toggleTagSelection(tag, activeDropdown)
+            }
+            isMultiSelect={activeDropdown !== "fandom"}
+          />
         </ThemedView>
       </View>
     </Modal>
@@ -323,8 +309,8 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 10,
     padding: 20,
-    width: "85%",
-    maxHeight: "80%",
+    width: "90%",
+    maxHeight: "90%",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -337,40 +323,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     marginBottom: 15,
     textAlign: "center",
-  },
-  searchContainer: {
-    marginBottom: 20,
-    position: "relative",
-  },
-  searchInput: {
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginTop: 5,
-  },
-  filterSection: {
-    marginBottom: 20,
-  },
-  filterLabel: {
-    marginBottom: 5,
-    fontWeight: "bold",
-  },
-  filterOptions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  filterOption: {
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    minWidth: 100,
-    alignItems: "center",
-  },
-  filterOptionText: {
-    fontSize: 14,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -391,40 +343,5 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 15,
     alignItems: "center",
-  },
-  dropdownContainer: {
-    position: "absolute",
-    top: 65,
-    left: 0,
-    right: 0,
-    borderWidth: 1,
-    borderRadius: 8,
-    zIndex: 1000,
-    padding: 8,
-    maxHeight: 250,
-  },
-  dropdownList: {
-    maxHeight: 180,
-  },
-  dropdownItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-  },
-  closeDropdownButton: {
-    marginTop: 8,
-    padding: 8,
-    borderRadius: 4,
-    alignItems: "center",
-  },
-  emptyList: {
-    padding: 10,
-    alignItems: "center",
-  },
-  clearFandom: {
-    position: "absolute",
-    right: 5,
-    top: 5,
-    padding: 5,
   },
 });

@@ -1,3 +1,4 @@
+import type { TActiveTagTypes } from "@/components/FilterModal";
 import { db } from "@/db/drizzle";
 import { tChapters, tTags, tWorks, tagTypes } from "@/db/schema";
 import {
@@ -5,6 +6,7 @@ import {
   and,
   desc,
   eq,
+  inArray,
   like,
   lt,
   max,
@@ -25,7 +27,7 @@ export type WorkFilter = {
   completedOnly?: boolean;
   inProgressOnly?: boolean;
   searchQuery?: string;
-  fandom?: string;
+  tags: Partial<Record<TActiveTagTypes, undefined | string[]>>;
 };
 
 export const worksWithHighestChapter = (filter?: WorkFilter) => {
@@ -65,11 +67,18 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
     if (filter.inProgressOnly) {
       conditions.push(lt(tChapters.chapterNumber, tWorks.chapters));
     }
-    if (filter.fandom) {
-      conditions.push(
-        and(eq(tTags.tag, filter.fandom), eq(tTags.typeId, tagTypes.fandom)),
-      );
+
+    if (filter.tags) {
+      for (const [type, tags] of Object.entries(filter.tags)) {
+        if (tags) {
+          const tagType = type as TActiveTagTypes;
+          conditions.push(
+            and(inArray(tTags.tag, tags), eq(tTags, tagTypes[tagType])),
+          );
+        }
+      }
     }
+
     if (filter.searchQuery && filter.searchQuery.trim() !== "") {
       const searchTerm = `%${filter.searchQuery.trim()}%`;
       conditions.push(
@@ -83,8 +92,7 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
       tFandom,
       and(eq(tFandom.workId, tWorks.id), eq(tFandom.typeId, tagTypes.fandom)),
     )
-    .leftJoin(tTags, and(eq(tTags.workId, tWorks.id)))
-    .where(conditions.length > 0 ? and(...[...conditions]) : undefined)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
     .groupBy(
       tWorks.id,
       tWorks.title,
@@ -99,11 +107,11 @@ export const worksWithHighestChapter = (filter?: WorkFilter) => {
     .orderBy(desc(tWorks.lastRead));
 };
 
-export const getAllFandoms = db
+export const getAllTags = db
   .select({
     tag: tTags.tag,
+    typeId: tTags.typeId,
   })
   .from(tTags)
-  .where(eq(tTags.typeId, tagTypes.fandom))
-  .groupBy(tTags.tag)
+  .groupBy(tTags.tag, tTags.typeId)
   .orderBy(tTags.tag);
