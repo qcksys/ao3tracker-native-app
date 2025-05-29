@@ -3,7 +3,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
 import { worksWithHighestChapter } from "@/db/queries/track";
-import { tChapters, tWorks } from "@/db/schema";
+import { tChapters, tTags, tWorkTags, tWorks } from "@/db/schema";
 import { useLiveTablesQuery } from "@qcksys/drizzle-extensions/useLiveTablesQuery";
 import Constants from "expo-constants";
 import { router } from "expo-router";
@@ -24,6 +24,8 @@ export default function TabTrackerScreen() {
   const { data } = useLiveTablesQuery(worksWithHighestChapter, [
     tWorks,
     tChapters,
+    tTags,
+    tWorkTags,
   ]);
 
   const goToAo3Homepage = () => {
@@ -90,7 +92,7 @@ export default function TabTrackerScreen() {
                     <View style={styles.cell90}>
                       <ThemedText>{work.title}</ThemedText>
                       <ThemedText style={[styles.statusText, styles.italic]}>
-                        Long Sample Fandom Text (Type) TODO
+                        {work.fandoms || "Unknown Fandoms"}
                       </ThemedText>
                     </View>
                     <Pressable

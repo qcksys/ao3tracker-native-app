@@ -1,6 +1,6 @@
 import { db } from "@/db/drizzle";
-import { tChapters, tWorks } from "@/db/schema";
-import { and, desc, eq, max } from "drizzle-orm";
+import { tChapters, tTags, tWorkTags, tWorks, tagTypes } from "@/db/schema";
+import { and, desc, eq, max, sql } from "drizzle-orm";
 
 export const maxChapterNumberSubquery = db
   .select({
@@ -22,6 +22,7 @@ export const worksWithHighestChapter = db
     highestChapterProgress: tChapters.lastChapterProgress,
     lastUpdated: tWorks.lastUpdated,
     lastRead: tWorks.lastRead,
+    fandoms: sql<string>`GROUP_CONCAT(count(${tTags.tag}) as int)`,
   })
   .from(tWorks)
   .leftJoin(
@@ -34,5 +35,21 @@ export const worksWithHighestChapter = db
       eq(tChapters.workId, tWorks.id),
       eq(tChapters.chapterNumber, maxChapterNumberSubquery.maxChapterNum),
     ),
+  )
+  .leftJoin(tWorkTags, eq(tWorkTags.workId, tWorks.id))
+  .leftJoin(
+    tTags,
+    and(eq(tTags.id, tWorkTags.tagId), eq(tTags.typeId, tagTypes.fandom)),
+  )
+  .groupBy(
+    tWorks.id,
+    tWorks.title,
+    tWorks.chapters,
+    tWorks.author,
+    tChapters.chapterNumber,
+    tChapters.id,
+    tChapters.lastChapterProgress,
+    tWorks.lastUpdated,
+    tWorks.lastRead,
   )
   .orderBy(desc(tWorks.lastRead));
