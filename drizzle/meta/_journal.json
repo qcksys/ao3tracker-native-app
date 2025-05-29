@@ -15,6 +15,13 @@
       "when": 1748443461315,
       "tag": "0001_ambitious_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1748489233417,
+      "tag": "0002_ordinary_colossus",
+      "breakpoints": true
     }
   ]
 }
