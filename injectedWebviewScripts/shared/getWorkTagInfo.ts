@@ -18,7 +18,7 @@ export const getWorkTagInfo = () => {
       document.querySelector(".work.meta.group .stats dd.published")
     )?.textContent?.trim(),
     rating: getArrayOfTagsFromAnchorElements("rating")[0],
-    warnings: [],
+    warning: [],
     category: getArrayOfTagsFromAnchorElements("category"),
     fandom: getArrayOfTagsFromAnchorElements("fandom"),
     relationship: getArrayOfTagsFromAnchorElements("relationship"),

@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import { db } from "@/db/drizzle";
-import { tChapters, tWorks } from "@/db/schema";
+import { tChapters, tTags, tWorks } from "@/db/schema";
 import { readWebViewScript } from "@/util/readWebViewScript";
 import {
   type TWorkInfoEvent,
@@ -11,7 +11,7 @@ import {
   workTagsInfoEvent,
 } from "@/util/workInfoParser";
 import { onConflictDoUpdateConfig } from "@qcksys/drizzle-extensions/onConflictDoUpdate";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import type React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -206,9 +206,45 @@ const onMessageWorkInfo = async (eventData: TWorkInfoEvent) => {
 const onMessageWorkTags = async (eventData: TWorkInfoEvent) => {
   const parsed = workTagsInfoEvent.safeParse(eventData);
   if (parsed.success) {
-    const tags = parseWorkTagsEvent(parsed.data);
+    const workUrl = new URL(parsed.data.url);
+    const pathParts = workUrl.pathname.split("/").filter(Boolean);
+
+    if (pathParts[0] !== "works" || Number.isNaN(Number(pathParts[1]))) {
+      console.error("workTags sent on non-work page", parsed, eventData);
+      return false;
+    }
+
+    const workId = Number(pathParts[1]);
+
+    const tagsMoreRecentThanWorkUpdate = await db.$count(
+      tTags,
+      and(
+        eq(tTags.workId, workId),
+        gt(tTags.rowCreatedAt, new Date(parsed.data.workLastUpdated ?? "")),
+      ),
+    );
+
+    if (!tagsMoreRecentThanWorkUpdate) {
+      console.log(
+        "No new tags to update for work",
+        workId,
+        "Skipping workTags update",
+      );
+      return;
+    }
+
+    const tags = parseWorkTagsEvent(parsed.data, workId);
+
+    const tagsUpsert = await db
+      .insert(tTags)
+      .values(tags)
+      .onConflictDoUpdate(
+        onConflictDoUpdateConfig(tTags, { target: [tTags.workId, tTags.tag] }),
+      );
+
+    console.log("Work tags updated", tagsUpsert);
   } else {
-    console.error("Error parsing workInfo", parsed, eventData);
+    console.error("Error parsing workTags", parsed, eventData);
   }
   return;
 };

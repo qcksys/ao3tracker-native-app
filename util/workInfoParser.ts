@@ -1,4 +1,4 @@
-import type { TTagsI } from "@/db/schema";
+import { type TTagTypeId, type TTagsI, tagTypes } from "@/db/schema";
 import { z } from "zod/v4";
 
 export const workUrlInfoSchema = z.object({
@@ -69,12 +69,14 @@ export const workTagEvent = z.object({
   href: z.string().nullish(),
 });
 
+export type TWorkTagEvent = z.infer<typeof workTagEvent>;
+
 export const workTagsInfoEvent = z.object({
   type: z.literal("workTags"),
   url: z.url(),
   workLastUpdated: z.string().optional(),
   rating: workTagEvent,
-  warnings: z.array(workTagEvent),
+  warning: z.array(workTagEvent),
   category: z.array(workTagEvent),
   fandom: z.array(workTagEvent),
   relationship: z.array(workTagEvent),
@@ -116,15 +118,58 @@ export const parseWorkInfoEvent = (workInfo: TWorkInfoEvent): TWorkInfo => {
   };
 };
 
-export const parseWorkTagsEvent = (workTags: TWorkTagInfoEvent) => {
-  const url = new URL(workTags.url);
-  const pathParts = url.pathname.split("/").filter(Boolean);
-
-  if (pathParts[0] !== "works" || Number.isNaN(Number(pathParts[1]))) {
-    return false;
-  }
-
-  const workId = Number(pathParts[1]);
-
+export const parseWorkTagsEvent = (
+  workTags: TWorkTagInfoEvent,
+  workId: number,
+) => {
   const workTagsInsert: TTagsI[] = [];
+
+  tagDataToDbInsert(workTagsInsert, [workTags.rating], tagTypes.rating, workId);
+  tagDataToDbInsert(workTagsInsert, workTags.warning, tagTypes.warning, workId);
+  tagDataToDbInsert(
+    workTagsInsert,
+    workTags.category,
+    tagTypes.category,
+    workId,
+  );
+  tagDataToDbInsert(workTagsInsert, workTags.fandom, tagTypes.fandom, workId);
+  tagDataToDbInsert(
+    workTagsInsert,
+    workTags.relationship,
+    tagTypes.relationship,
+    workId,
+  );
+  tagDataToDbInsert(
+    workTagsInsert,
+    workTags.character,
+    tagTypes.character,
+    workId,
+  );
+  tagDataToDbInsert(
+    workTagsInsert,
+    workTags.freeform,
+    tagTypes.freeform,
+    workId,
+  );
+
+  return workTagsInsert;
+};
+
+const tagDataToDbInsert = (
+  workTagsInsert: TTagsI[],
+  tags: TWorkTagEvent[],
+  typeId: TTagTypeId,
+  workId: number,
+) => {
+  for (const tag of tags) {
+    if (tag.tag && tag.href) {
+      workTagsInsert.push({
+        workId,
+        tag: tag.tag,
+        href: tag.href,
+        typeId,
+        rowCreatedAt: new Date(),
+      });
+    }
+  }
 };
