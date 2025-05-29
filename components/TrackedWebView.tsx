@@ -6,6 +6,7 @@ import {
   type TWorkInfoEvent,
   parseNavStateUrl,
   parseWorkInfoEvent,
+  parseWorkTagsEvent,
   workInfoEvent,
   workTagsInfoEvent,
 } from "@/util/workInfoParser";
@@ -205,7 +206,7 @@ const onMessageWorkInfo = async (eventData: TWorkInfoEvent) => {
 const onMessageWorkTags = async (eventData: TWorkInfoEvent) => {
   const parsed = workTagsInfoEvent.safeParse(eventData);
   if (parsed.success) {
-    console.log(parsed.data);
+    const tags = parseWorkTagsEvent(parsed.data);
   } else {
     console.error("Error parsing workInfo", parsed, eventData);
   }

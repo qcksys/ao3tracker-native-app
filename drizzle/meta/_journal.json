@@ -19,15 +19,8 @@
     {
       "idx": 2,
       "version": "6",
-      "when": 1748489233417,
-      "tag": "0002_ordinary_colossus",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1748495673458,
-      "tag": "0003_ordinary_arclight",
+      "when": 1748498893932,
+      "tag": "0002_sweet_owl",
       "breakpoints": true
     }
   ]

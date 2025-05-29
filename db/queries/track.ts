@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { tChapters, tTags, tWorkTags, tWorks, tagTypes } from "@/db/schema";
+import { tChapters, tTags, tWorks, tagTypes } from "@/db/schema";
 import { and, desc, eq, max, sql } from "drizzle-orm";
 
 export const maxChapterNumberSubquery = db
@@ -36,10 +36,9 @@ export const worksWithHighestChapter = db
       eq(tChapters.chapterNumber, maxChapterNumberSubquery.maxChapterNum),
     ),
   )
-  .leftJoin(tWorkTags, eq(tWorkTags.workId, tWorks.id))
   .leftJoin(
     tTags,
-    and(eq(tTags.id, tWorkTags.tagId), eq(tTags.typeId, tagTypes.fandom)),
+    and(eq(tTags.workId, tWorks.id), eq(tTags.typeId, tagTypes.fandom)),
   )
   .groupBy(
     tWorks.id,

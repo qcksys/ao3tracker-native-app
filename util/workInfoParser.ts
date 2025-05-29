@@ -1,3 +1,4 @@
+import type { TTagsI } from "@/db/schema";
 import { z } from "zod/v4";
 
 export const workUrlInfoSchema = z.object({
@@ -113,4 +114,17 @@ export const parseWorkInfoEvent = (workInfo: TWorkInfoEvent): TWorkInfo => {
       : undefined,
     workUrlData: parseNavStateUrl(new URL(workInfo.url)),
   };
+};
+
+export const parseWorkTagsEvent = (workTags: TWorkTagInfoEvent) => {
+  const url = new URL(workTags.url);
+  const pathParts = url.pathname.split("/").filter(Boolean);
+
+  if (pathParts[0] !== "works" || Number.isNaN(Number(pathParts[1]))) {
+    return false;
+  }
+
+  const workId = Number(pathParts[1]);
+
+  const workTagsInsert: TTagsI[] = [];
 };

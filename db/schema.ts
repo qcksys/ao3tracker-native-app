@@ -1,5 +1,6 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
+  index,
   integer,
   primaryKey,
   sqliteTable,
@@ -28,25 +29,6 @@ export const sWorksS = createSelectSchema(tWorks);
 export type TWorksS = InferSelectModel<typeof tWorks>;
 export type TWorksI = InferInsertModel<typeof tWorks>;
 
-export const tWorkTags = sqliteTable(
-  "workTags",
-  {
-    workId: integer({ mode: "number" }).notNull(),
-    tagId: integer({ mode: "number" }).notNull(),
-    linkedAt: integer({ mode: "timestamp" })
-      .$default(() => new Date())
-      .notNull(),
-  },
-  (table) => {
-    return [primaryKey({ columns: [table.workId, table.tagId] })];
-  },
-);
-
-export const sWorkTagsI = createInsertSchema(tWorkTags);
-export const sWorkTagsS = createSelectSchema(tWorkTags);
-export type TWorkTagsS = InferSelectModel<typeof tWorkTags>;
-export type TWorkTagsI = InferInsertModel<typeof tWorkTags>;
-
 export const tagTypes = {
   unknown: 0,
   rating: 1,
@@ -60,15 +42,24 @@ export const tagTypes = {
 export type TTagType = typeof tagTypes;
 export type TTagTypeId = TTagType[keyof TTagType];
 
-export const tTags = sqliteTable("tags", {
-  id: integer({ mode: "number" }).notNull().primaryKey({ autoIncrement: true }),
-  tag: text().notNull().unique(),
-  href: text().notNull(),
-  typeId: integer({ mode: "number" }).$type<TTagTypeId>().notNull(),
-  rowCreatedAt: integer({ mode: "timestamp" })
-    .$default(() => new Date())
-    .notNull(),
-});
+export const tTags = sqliteTable(
+  "tags",
+  {
+    workId: integer({ mode: "number" }).notNull(),
+    tag: text().notNull(),
+    href: text().notNull(),
+    typeId: integer({ mode: "number" }).$type<TTagTypeId>().notNull(),
+    rowCreatedAt: integer({ mode: "timestamp" })
+      .$default(() => new Date())
+      .notNull(),
+  },
+  (table) => {
+    return [
+      primaryKey({ columns: [table.workId, table.tag] }),
+      index("idx_tags_typeId").on(table.typeId),
+    ];
+  },
+);
 
 export const sTagsI = createInsertSchema(tTags);
 export const sTagsS = createSelectSchema(tTags);

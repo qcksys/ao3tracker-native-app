@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "056d3992-1293-4dc0-8743-4b544417cc8a",
+  "id": "eb201503-e89b-48fd-ab9d-1a77f3384dea",
   "prevId": "9c1703d5-b014-449f-b420-b331f00862f3",
   "tables": {
     "chapters": {
@@ -88,12 +88,12 @@
     "tags": {
       "name": "tags",
       "columns": {
-        "id": {
-          "name": "id",
+        "workId": {
+          "name": "workId",
           "type": "integer",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "tag": {
           "name": "tag",
@@ -124,46 +124,23 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "workTags": {
-      "name": "workTags",
-      "columns": {
-        "workId": {
-          "name": "workId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "tagId": {
-          "name": "tagId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "linkedAt": {
-          "name": "linkedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+      "indexes": {
+        "idx_tags_typeId": {
+          "name": "idx_tags_typeId",
+          "columns": [
+            "typeId"
+          ],
+          "isUnique": false
         }
       },
-      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "workTags_workId_tagId_pk": {
+        "tags_workId_tag_pk": {
           "columns": [
             "workId",
-            "tagId"
+            "tag"
           ],
-          "name": "workTags_workId_tagId_pk"
+          "name": "tags_workId_tag_pk"
         }
       },
       "uniqueConstraints": {},
@@ -203,6 +180,13 @@
         "lastRead": {
           "name": "lastRead",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "author": {
+          "name": "author",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
