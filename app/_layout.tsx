@@ -1,4 +1,5 @@
 import { db, expoDb } from "@/db/drizzle";
+import { posthog } from "@/util/posthog";
 import {
   DarkTheme,
   DefaultTheme,
@@ -11,6 +12,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import * as Sentry from "@sentry/react-native";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useSQLiteDevTools } from "expo-sqlite-devtools";
+import { useEffect } from "react";
 import migrations from "../drizzle/migrations";
 
 Sentry.init({
@@ -19,28 +21,45 @@ Sentry.init({
 });
 
 function App() {
+  useEffect(() => {
+    posthog.capture("app_load", { error: false });
+  }, []);
+
   const migration = useMigrations(db, migrations);
   if (migration.error) {
     console.error("Migration Error:", migration.error);
+    posthog.capture("drizzle_migrate_error", {
+      error: true,
+      message: JSON.stringify(migration.error),
+    });
     return null;
   }
 
   useSQLiteDevTools(expoDb);
 
-  const colorScheme = useColorScheme();
   if (!migration.success) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
+    </>
+  );
+}
+
+function AppProviders() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <App />
     </ThemeProvider>
   );
 }
 
-export default Sentry.wrap(App);
+export default Sentry.wrap(AppProviders);
